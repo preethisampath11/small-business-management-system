@@ -5,10 +5,12 @@ import { Sidebar } from "../components/Sidebar";
 import { Navbar } from "../components/Navbar";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api";
+import { AddOrder } from "./AddOrder";
 
 export const Orders = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const [showAddOrder, setShowAddOrder] = useState(false);
   const [allOrders, setAllOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,31 +19,42 @@ export const Orders = () => {
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
   const [downloadingInvoiceId, setDownloadingInvoiceId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [pagination, setPagination] = useState({});
 
-  // Fetch orders on component mount
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:5000/api/orders", {
+  // Fetch orders with pagination
+  const fetchOrders = async (pageNum = page, limitNum = limit) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const response = await API.get(
+        `/orders?page=${pageNum}&limit=${limitNum}`,
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
+        }
+      );
 
-        if (!response.ok) throw new Error("Failed to fetch orders");
-        const data = await response.json();
-        setAllOrders(data.orders || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      if (response.data.success) {
+        setAllOrders(response.data.orders || []);
+        setPagination(response.data.pagination || {});
       }
-    };
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to fetch orders"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchOrders();
-  }, []);
+  useEffect(() => {
+    fetchOrders(page, limit);
+  }, [page, limit]);
 
   // Apply filters and search
   useEffect(() => {
@@ -72,6 +85,54 @@ export const Orders = () => {
 
     setFilteredOrders(filtered);
   }, [allOrders, searchTerm, orderStatusFilter, paymentStatusFilter]);
+
+  // Handle limit change - reset to page 1
+  const handleLimitChange = (newLimit) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
+
+  // Status Pill Component
+  const StatusPill = ({ status }) => {
+    const styles = {
+      paid: { bg: "#0d2b1a", color: "#3fcf8e" },
+      unpaid: { bg: "#2b0a0a", color: "#e05555" },
+      partial: { bg: "#2b1a00", color: "#e8a020" },
+      pending: { bg: "#2b1a00", color: "#e8a020" },
+      delivered: { bg: "#0d2b1a", color: "#3fcf8e" },
+      processing: { bg: "#0d1e2e", color: "#378ADD" },
+    };
+    const s =
+      styles[status?.toLowerCase()] || { bg: "#1e1e1e", color: "#888" };
+    return (
+      <span
+        style={{
+          background: s.bg,
+          color: s.color,
+          padding: "3px 10px",
+          borderRadius: "20px",
+          fontSize: "11px",
+          fontWeight: "500",
+          border: `1px solid ${s.color}33`,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {status?.charAt(0).toUpperCase() + status?.slice(1)}
+      </span>
+    );
+  };
+
+  // Pagination button styling helper
+  const pageBtn = (disabled) => ({
+    background: "#1e1e1e",
+    color: disabled ? "#333" : "#888",
+    border: "1px solid #2a2a2a",
+    borderRadius: "8px",
+    padding: "6px 10px",
+    fontSize: "13px",
+    cursor: disabled ? "default" : "pointer",
+    fontFamily: "Inter, system-ui",
+  });
 
   const handleOrderStatusChange = async (orderId, newStatus) => {
     try {
@@ -217,51 +278,117 @@ export const Orders = () => {
       <Navbar />
 
       <div className="ml-[232px] pt-[92px] p-4 sm:p-6">
-        {/* Action Button */}
-        <div className="flex justify-end mb-6">
-          <button
-            onClick={() => navigate("/dashboard/orders/add")}
-            className="bg-[#378ADD] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition font-semibold text-xs sm:text-sm whitespace-nowrap"
+        {/* Stat Cards */}
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+          {/* Total Orders Card */}
+          <div
+            style={{
+              background: '#161616',
+              border: '1px solid #222',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              minWidth: '0',
+              flex: 1
+            }}
           >
-            + New Order
-          </button>
-        </div>
+            <div
+              style={{
+                fontSize: '12px',
+                color: '#888',
+                fontWeight: '500',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '10px'
+              }}
+            >
+              Total Orders
+            </div>
+            <div style={{ fontSize: '28px', fontWeight: '700', color: '#e8e8e8' }}>
+              {totalOrders}
+            </div>
+          </div>
 
-        {/* Header */}
-        <div className="bg-[#161616] border-b border-[#222] px-4 sm:px-6 py-4 -mx-4 sm:-mx-6">
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-            <div className="bg-[#111] rounded border border-[#222] p-2.5 sm:p-3">
-              <div className="text-gray-400 text-xs font-semibold uppercase">
-                Total Orders
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-white">
-                {totalOrders}
-              </div>
+          {/* Pending Card */}
+          <div
+            style={{
+              background: '#161616',
+              border: '1px solid #222',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              minWidth: '0',
+              flex: 1
+            }}
+          >
+            <div
+              style={{
+                fontSize: '12px',
+                color: '#888',
+                fontWeight: '500',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '10px'
+              }}
+            >
+              Pending
             </div>
-            <div className="bg-[#111] rounded border border-[#222] p-2.5 sm:p-3">
-              <div className="text-gray-400 text-xs font-semibold uppercase">
-                Pending
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-[#e8a020]">
-                {pendingOrders}
-              </div>
+            <div style={{ fontSize: '28px', fontWeight: '700', color: '#e8a020' }}>
+              {pendingOrders}
             </div>
-            <div className="bg-[#111] rounded border border-[#222] p-2.5 sm:p-3">
-              <div className="text-gray-400 text-xs font-semibold uppercase">
-                Delivered
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-[#3fcf8e]">
-                {deliveredOrders}
-              </div>
+          </div>
+
+          {/* Delivered Card */}
+          <div
+            style={{
+              background: '#161616',
+              border: '1px solid #222',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              minWidth: '0',
+              flex: 1
+            }}
+          >
+            <div
+              style={{
+                fontSize: '12px',
+                color: '#888',
+                fontWeight: '500',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '10px'
+              }}
+            >
+              Delivered
             </div>
-            <div className="bg-[#111] rounded border border-[#222] p-2.5 sm:p-3">
-              <div className="text-gray-400 text-xs font-semibold uppercase">
-                Unpaid
-              </div>
-              <div className="text-xl sm:text-2xl font-bold text-[#e05555]">
-                {unpaidOrders}
-              </div>
+            <div style={{ fontSize: '28px', fontWeight: '700', color: '#3fcf8e' }}>
+              {deliveredOrders}
+            </div>
+          </div>
+
+          {/* Unpaid Card */}
+          <div
+            style={{
+              background: '#161616',
+              border: '1px solid #222',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              minWidth: '0',
+              flex: 1
+            }}
+          >
+            <div
+              style={{
+                fontSize: '12px',
+                color: '#888',
+                fontWeight: '500',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                marginBottom: '10px'
+              }}
+            >
+              Unpaid
+            </div>
+            <div style={{ fontSize: '28px', fontWeight: '700', color: '#e05555' }}>
+              {unpaidOrders}
             </div>
           </div>
         </div>
@@ -335,12 +462,38 @@ export const Orders = () => {
             <div className="text-center text-gray-400 py-12">
               Loading orders...
             </div>
-          ) : filteredOrders.length === 0 ? (
+          ) : allOrders.length === 0 ? (
             <div className="text-center text-gray-400 py-12 bg-[#161616] rounded-lg border border-[#222]">
               No orders found
             </div>
           ) : (
-            <div className="bg-[#161616] rounded-lg border border-[#222] overflow-hidden">
+            <>
+              {/* Per-page selector */}
+              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
+                <select
+                  value={limit}
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  style={{
+                    background: "#1e1e1e",
+                    color: "#888",
+                    border: "1px solid #2a2a2a",
+                    borderRadius: "8px",
+                    padding: "6px 10px",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={25}>25 per page</option>
+                  <option value={50}>50 per page</option>
+                  <option value={100}>100 per page</option>
+                </select>
+              </div>
+
+              <div className="bg-[#161616] rounded-lg border border-[#222] overflow-hidden">
               {/* Desktop Table View */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm">
@@ -367,7 +520,7 @@ export const Orders = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredOrders.map((order) => (
+                    {allOrders.map((order) => (
                       <tr
                         key={order._id}
                         className="border-t border-[#222] hover:bg-[#1a1a1a] transition cursor-pointer text-sm"
@@ -383,7 +536,11 @@ export const Orders = () => {
                           </div>
                         </td>
                         <td className="px-3 sm:px-6 py-4 text-gray-300 text-xs sm:text-sm">
-                          {new Date(order.createdAt).toLocaleDateString()}
+                          {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
                         </td>
                         <td className="px-3 sm:px-6 py-4">
                           <span className="text-white font-semibold text-xs sm:text-sm">
@@ -391,37 +548,20 @@ export const Orders = () => {
                           </span>
                         </td>
                         <td className="px-3 sm:px-6 py-4">
-                          <select
-                            value={order.orderStatus}
-                            onChange={(e) =>
-                              handleOrderStatusChange(order._id, e.target.value)
-                            }
-                            className={`px-2 sm:px-3 py-1 rounded text-xs font-semibold focus:outline-none cursor-pointer ${getOrderStatusBadgeColor(
-                              order.orderStatus,
-                            )}`}
+                          <div
+                            onClick={() => handleOrderStatusChange(order._id, order.orderStatus === "pending" ? "processing" : order.orderStatus === "processing" ? "delivered" : "pending")}
+                            style={{ cursor: "pointer" }}
                           >
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="delivered">Delivered</option>
-                          </select>
+                            <StatusPill status={order.orderStatus} />
+                          </div>
                         </td>
                         <td className="px-3 sm:px-6 py-4">
-                          <select
-                            value={order.paymentStatus}
-                            onChange={(e) =>
-                              handlePaymentStatusChange(
-                                order._id,
-                                e.target.value,
-                              )
-                            }
-                            className={`px-2 sm:px-3 py-1 rounded text-xs font-semibold focus:outline-none cursor-pointer ${getPaymentStatusBadgeColor(
-                              order.paymentStatus,
-                            )}`}
+                          <div
+                            onClick={() => handlePaymentStatusChange(order._id, order.paymentStatus === "unpaid" ? "partial" : order.paymentStatus === "partial" ? "paid" : "unpaid")}
+                            style={{ cursor: "pointer" }}
                           >
-                            <option value="unpaid">Unpaid</option>
-                            <option value="partial">Partial</option>
-                            <option value="paid">Paid</option>
-                          </select>
+                            <StatusPill status={order.paymentStatus} />
+                          </div>
                         </td>
                         <td className="px-3 sm:px-6 py-4">
                           <div className="flex items-center gap-1 sm:gap-2">
@@ -459,7 +599,7 @@ export const Orders = () => {
 
               {/* Mobile Card View */}
               <div className="md:hidden space-y-3 p-3 sm:p-4">
-                {filteredOrders.map((order) => (
+                {allOrders.map((order) => (
                   <div
                     key={order._id}
                     className="bg-[#1a1a1a] rounded border border-[#222] p-3 sm:p-4 hover:border-[#378ADD] transition space-y-3"
@@ -487,36 +627,20 @@ export const Orders = () => {
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-gray-400">
-                        {new Date(order.createdAt).toLocaleDateString()}
+                        {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <select
-                        value={order.orderStatus}
-                        onChange={(e) =>
-                          handleOrderStatusChange(order._id, e.target.value)
-                        }
-                        className={`px-2 py-1 rounded text-xs font-semibold focus:outline-none cursor-pointer ${getOrderStatusBadgeColor(
-                          order.orderStatus,
-                        )}`}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="delivered">Delivered</option>
-                      </select>
-                      <select
-                        value={order.paymentStatus}
-                        onChange={(e) =>
-                          handlePaymentStatusChange(order._id, e.target.value)
-                        }
-                        className={`px-2 py-1 rounded text-xs font-semibold focus:outline-none cursor-pointer ${getPaymentStatusBadgeColor(
-                          order.paymentStatus,
-                        )}`}
-                      >
-                        <option value="unpaid">Unpaid</option>
-                        <option value="partial">Partial</option>
-                        <option value="paid">Paid</option>
-                      </select>
+                    <div className="flex gap-2 flex-wrap">
+                      <div>
+                        <StatusPill status={order.orderStatus} />
+                      </div>
+                      <div>
+                        <StatusPill status={order.paymentStatus} />
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -545,16 +669,185 @@ export const Orders = () => {
                 ))}
               </div>
             </div>
-          )}
 
-          {/* Results Count */}
-          {filteredOrders.length > 0 && (
-            <div className="mt-4 text-gray-400 text-xs sm:text-sm">
-              Showing {filteredOrders.length} of {allOrders.length} orders
-            </div>
+              {/* Pagination Controls */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginTop: "16px",
+                  padding: "0 4px",
+                }}
+              >
+                <span style={{ fontSize: "12px", color: "#555" }}>
+                  Showing{" "}
+                  {(page - 1) * limit + 1}–
+                  {Math.min(page * limit, pagination.total || 0)} of{" "}
+                  {pagination.total || 0} orders
+                </span>
+
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    style={{
+                      background: "#1e1e1e",
+                      color: page === 1 ? "#333" : "#888",
+                      border: "1px solid #2a2a2a",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      fontSize: "12px",
+                      cursor: page === 1 ? "default" : "pointer",
+                    }}
+                  >
+                    ← Prev
+                  </button>
+
+                  {/* Page number pills — show max 5 */}
+                  {Array.from(
+                    {
+                      length: Math.min(5, pagination.totalPages || 1),
+                    },
+                    (_, i) => {
+                      const start = Math.max(
+                        1,
+                        Math.min(
+                          (pagination.totalPages || 1) - 4,
+                          page - 2
+                        )
+                      );
+                      const p = start + i;
+                      return (
+                        <button
+                          key={p}
+                          onClick={() => setPage(p)}
+                          style={{
+                            background: p === page ? "#378ADD" : "#1e1e1e",
+                            color: p === page ? "#fff" : "#888",
+                            border: "1px solid #2a2a2a",
+                            borderRadius: "8px",
+                            padding: "6px 10px",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            minWidth: "32px",
+                          }}
+                        >
+                          {p}
+                        </button>
+                      );
+                    }
+                  )}
+
+                  <button
+                    onClick={() =>
+                      setPage((p) =>
+                        Math.min(pagination.totalPages || 1, p + 1)
+                      )
+                    }
+                    disabled={page === (pagination.totalPages || 1)}
+                    style={{
+                      background: "#1e1e1e",
+                      color:
+                        page === (pagination.totalPages || 1) ? "#333" : "#888",
+                      border: "1px solid #2a2a2a",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      fontSize: "12px",
+                      cursor:
+                        page === (pagination.totalPages || 1)
+                          ? "default"
+                          : "pointer",
+                    }}
+                  >
+                    Next →
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
+
+      {/* Floating Add Order Button */}
+      <button
+        onClick={() => setShowAddOrder(true)}
+        style={{
+          position: 'fixed',
+          bottom: '32px',
+          right: '32px',
+          background: '#378ADD',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '50px',
+          padding: '14px 24px',
+          fontSize: '15px',
+          fontWeight: '600',
+          cursor: 'pointer',
+          fontFamily: 'Inter, system-ui',
+          boxShadow: '0 4px 20px rgba(55, 138, 221, 0.4)',
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+      >
+        <span style={{ fontSize: '20px', lineHeight: 1 }}>+</span> Add Order
+      </button>
+
+      {/* Add Order Modal */}
+      {showAddOrder && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAddOrder(false);
+          }}
+        >
+          <div style={{
+            background: '#161616',
+            border: '1px solid #222',
+            borderRadius: '16px',
+            width: '90%',
+            maxWidth: '860px',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '32px',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowAddOrder(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '20px',
+                background: 'none',
+                border: 'none',
+                color: '#888',
+                fontSize: '22px',
+                cursor: 'pointer',
+                lineHeight: 1
+              }}
+            >
+              ×
+            </button>
+            <AddOrder
+              isModal={true}
+              onSuccess={() => {
+                setShowAddOrder(false);
+                fetchOrders();
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

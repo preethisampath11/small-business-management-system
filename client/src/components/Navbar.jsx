@@ -35,7 +35,7 @@ export const Navbar = () => {
       style={{
         position: "fixed",
         top: "16px",
-        left: "248px",
+        left: "232px",
         right: "16px",
         height: "60px",
         borderRadius: "16px",

@@ -23,3 +23,20 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Card strip scrollbar styling */
+.card-strip::-webkit-scrollbar {
+  height: 4px;
+}
+.card-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+.card-strip::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 2px;
+}
+
+/* Hide scrollbars in top selling list */
+.top-sell-scroll::-webkit-scrollbar {
+  display: none;
+}

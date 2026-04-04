@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import API from "../api";
 
 export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
   const [current, setCurrent] = useState(new Date());
-  const today = new Date();
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [dateRevenue, setDateRevenue] = useState(0);
+
+  // Get today in LOCAL time correctly
+  const now = new Date();
+  const todayDate = now.getDate();
+  const todayMonth = now.getMonth();
+  const todayYear = now.getFullYear();
 
   const year = current.getFullYear();
   const month = current.getMonth();
@@ -23,6 +31,38 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
   ];
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+  // Fetch revenue for a specific date
+  const fetchDateRevenue = async (date) => {
+    try {
+      // Format date in LOCAL timezone (not UTC)
+      const dateStr = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      const response = await API.get(`/orders/stats/by-date?date=${dateStr}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (response.data.success) {
+        setDateRevenue(response.data.revenue || 0);
+      }
+    } catch (err) {
+      console.error("Failed to fetch date revenue:", err);
+      setDateRevenue(0);
+    }
+  };
+
+  // Fetch today's revenue on mount
+  useEffect(() => {
+    fetchDateRevenue(new Date());
+  }, []);
+
+  const handleDayClick = (d) => {
+    const clickedDate = new Date(year, month, d);
+    setSelectedDay(d);
+    fetchDateRevenue(clickedDate);
+  };
+
   // Calculate first day of month and offset
   const firstDay = new Date(year, month, 1).getDay();
   const offset = (firstDay + 6) % 7; // convert to Mon-start
@@ -39,12 +79,14 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
   // Day cells
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday =
-      d === today.getDate() &&
-      month === today.getMonth() &&
-      year === today.getFullYear();
+      d === todayDate &&
+      month === todayMonth &&
+      year === todayYear;
+    const isSelected = selectedDay === d;
     cells.push(
       <div
         key={`day-${d}`}
+        onClick={() => handleDayClick(d)}
         style={{
           width: "32px",
           height: "32px",
@@ -55,15 +97,13 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
           fontSize: "12px",
           cursor: "pointer",
           margin: "2px auto",
-          background: isToday ? "#378ADD" : "transparent",
-          color: isToday ? "#fff" : "#888",
-          transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) => {
-          if (!isToday) e.currentTarget.style.background = "#1e1e1e";
-        }}
-        onMouseLeave={(e) => {
-          if (!isToday) e.currentTarget.style.background = "transparent";
+          background: isSelected ? "#378ADD" 
+                    : isToday ? "#1e1e1e" 
+                    : "transparent",
+          color: isSelected ? "#fff" 
+               : isToday ? "#e8e8e8" 
+               : "#888",
+          transition: "background 0.15s",
         }}
       >
         {d}
@@ -189,7 +229,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
             flex: 1,
           }}
         >
-          Rs. {ordersThisMonthRevenue?.toLocaleString("en-IN") || 0}
+          Rs. {(selectedDay ? dateRevenue : ordersThisMonthRevenue)?.toLocaleString("en-IN") || 0}
         </span>
         <span
           style={{

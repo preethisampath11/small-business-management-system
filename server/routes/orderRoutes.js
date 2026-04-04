@@ -6,6 +6,7 @@ import {
   updateOrder,
   deleteOrder,
   getInvoice,
+  getStatsByDate,
 } from "../controllers/orderController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import {
@@ -22,10 +23,16 @@ router.use(verifyToken);
 // @desc    Get all orders for logged-in seller
 router.get("/", getOrders);
 
+// STATIC routes FIRST — before any /:param routes
+// @route   GET /api/orders/stats/by-date
+// @desc    Get revenue stats for a specific date
+router.get("/stats/by-date", getStatsByDate);
+
 // @route   GET /api/orders/:id/invoice
 // @desc    Generate and download invoice PDF
 router.get("/:id/invoice", getInvoice);
 
+// THEN dynamic routes
 // @route   GET /api/orders/:id
 // @desc    Get single order with full details
 router.get("/:id", getOrderById);

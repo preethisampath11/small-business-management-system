@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import Customer from "../models/Customer.js";
 import Item from "../models/Item.js";
+import mongoose from "mongoose";
 import { generateInvoicePDF } from "../utils/generateInvoice.js";
 
 // @desc    Get all orders for logged-in seller
@@ -8,14 +9,28 @@ import { generateInvoicePDF } from "../utils/generateInvoice.js";
 // @access  Private
 export const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ userId: req.user.id })
-      .populate("customerId", "name email phone")
-      .sort({ createdAt: -1 });
+    const { page = 1, limit = 10 } = req.query;
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const total = await Order.countDocuments({ userId });
+    
+    const orders = await Order.find({ userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate("customerId", "name email phone");
 
     res.status(200).json({
       success: true,
       count: orders.length,
       orders,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / parseInt(limit)),
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -383,4 +398,54 @@ export const cancelOrder = async (req, res) => {
     success: false,
     message: "Order cancellation not yet implemented",
   });
+};
+
+// @desc    Get revenue stats for a specific date
+// @route   GET /api/orders/stats/by-date
+// @access  Private
+export const getStatsByDate = async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: "date required",
+      });
+    }
+
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    // Parse date in local timezone (not UTC)
+    const [y, m, d] = date.split("-").map(Number);
+    const start = new Date(y, m - 1, d, 0, 0, 0, 0);
+    const end = new Date(y, m - 1, d, 23, 59, 59, 999);
+
+    const result = await Order.aggregate([
+      {
+        $match: {
+          userId,
+          paymentStatus: "paid",
+          createdAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalAmount" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    res.json({
+      success: true,
+      date,
+      revenue: result[0]?.total || 0,
+      orderCount: result[0]?.count || 0,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 };

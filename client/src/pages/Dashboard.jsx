@@ -11,6 +11,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   XAxis,
+  YAxis,
+  Cell,
 } from "recharts";
 import { CalendarWidget } from "../components/CalendarWidget";
 
@@ -93,16 +95,21 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
   const [stats, setStats] = useState(null);
+  const [chartData, setChartData] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [lowStockItems, setLowStockItems] = useState([]);
+  const [lowStockCount, setLowStockCount] = useState(0);
+  const [topSellingItems, setTopSellingItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [timeRange, setTimeRange] = useState("yearly");
+  const [period, setPeriod] = useState("yearly");
 
-  // Fetch dashboard stats on mount
+  // Fetch dashboard stats whenever period changes
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const response = await API.get("/dashboard/stats", {
+        const response = await API.get(`/dashboard/stats?period=${period}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -114,9 +121,12 @@ export const Dashboard = () => {
             pendingDues: response.data.pendingDues,
             totalOrders: response.data.totalOrders,
             ordersThisMonth: response.data.ordersThisMonth,
-            monthlyRevenue: response.data.monthlyRevenue,
-            recentOrders: response.data.recentOrders,
           });
+          setChartData(response.data.chartData || []);
+          setRecentOrders(response.data.recentOrders || []);
+          setLowStockItems(response.data.lowStockItems || []);
+          setLowStockCount(response.data.lowStockCount || 0);
+          setTopSellingItems(response.data.topSellingItems || []);
           setError("");
         }
       } catch (err) {
@@ -132,10 +142,7 @@ export const Dashboard = () => {
     };
 
     fetchStats();
-  }, []);
-
-  // Chart data is already in correct format from backend
-  const chartData = stats?.monthlyRevenue || [];
+  }, [period]);
 
   const getPaymentStatusBadgeColor = (status) => {
     switch (status) {
@@ -163,23 +170,48 @@ export const Dashboard = () => {
     }
   };
 
-  // Calculate revenue trend from monthly data
-  const calculateTrend = () => {
-    if (!chartData || chartData.length < 2) return 0;
-    const current = chartData[chartData.length - 1]?.revenue || 0;
-    const previous = chartData[chartData.length - 2]?.revenue || 0;
-    if (previous === 0) return 0;
-    return Math.round(((current - previous) / previous) * 100);
+  // Status Pill Component
+  const StatusPill = ({ status }) => {
+    const styles = {
+      paid: { bg: "#0d2b1a", color: "#3fcf8e" },
+      unpaid: { bg: "#2b0a0a", color: "#e05555" },
+      partial: { bg: "#2b1a00", color: "#e8a020" },
+      pending: { bg: "#2b1a00", color: "#e8a020" },
+      delivered: { bg: "#0d2b1a", color: "#3fcf8e" },
+      processing: { bg: "#0d1e2e", color: "#378ADD" },
+    };
+    const s = styles[status?.toLowerCase()] || { bg: "#1e1e1e", color: "#888" };
+    return (
+      <span
+        style={{
+          background: s.bg,
+          color: s.color,
+          padding: "3px 10px",
+          borderRadius: "20px",
+          fontSize: "11px",
+          fontWeight: "500",
+          border: `1px solid ${s.color}33`,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {status?.charAt(0).toUpperCase() + status?.slice(1)}
+      </span>
+    );
   };
 
-  const trend = calculateTrend();
+  const tdStyle = {
+    padding: "14px 12px",
+    fontSize: "13px",
+    color: "#ccc",
+    whiteSpace: "nowrap",
+  };
 
   return (
     <div className="relative min-h-screen bg-[#111]">
       <Sidebar />
       <Navbar />
 
-      <div className="ml-[232px] pt-[92px] p-4 sm:p-6 min-h-screen overflow-y-auto pb-[32px]">
+      <div className="ml-[232px] pt-[92px] px-[16px] pb-[32px] min-h-screen overflow-y-auto">
         {error && (
           <div className="bg-[#2b0a0a] text-[#e05555] p-4 rounded-lg mb-6 border border-[#e05555] text-xs sm:text-sm">
             {error}
@@ -192,161 +224,425 @@ export const Dashboard = () => {
           </div>
         ) : stats ? (
           <div className="space-y-6">
-            {/* Row 1: Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Total Revenue Card */}
+            {/* Row 1: Horizontal Scrollable Card Strip */}
+            <div style={{ position: "relative" }}>
               <div
+                className="card-strip"
                 style={{
-                  background: "#161616",
-                  border: "1px solid #222",
-                  borderRadius: "14px",
-                  padding: "20px",
+                  display: "flex",
+                  gap: "14px",
+                  alignItems: "flex-start",
+                  overflowX: "auto",
+                  paddingBottom: "8px",
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "#2a2a2a transparent",
+                  WebkitOverflowScrolling: "touch",
                 }}
               >
+                {/* Card 1: Total Revenue */}
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "16px",
+                    flexShrink: 0,
+                    width: "220px",
+                    height: "220px",
+                    background: "#161616",
+                    border: "1px solid #222",
+                    borderRadius: "14px",
+                    padding: "20px",
                   }}
                 >
-                  <span
-                    style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "16px",
+                    }}
                   >
-                    Total Revenue
-                  </span>
-                  <TotalRevenueIcon />
+                    <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>
+                      Total Revenue
+                    </span>
+                    <TotalRevenueIcon />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 600,
+                      color: "#3fcf8e",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Rs. {stats.totalRevenue.toLocaleString("en-IN")}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#555" }}>
+                    From paid orders
+                  </div>
                 </div>
+
+                {/* Card 2: Pending Dues */}
                 <div
                   style={{
-                    fontSize: "24px",
-                    fontWeight: 600,
-                    color: "#3fcf8e",
-                    marginBottom: "8px",
+                    flexShrink: 0,
+                    width: "220px",
+                    height: "220px",
+                    background: "#161616",
+                    border: "1px solid #222",
+                    borderRadius: "14px",
+                    padding: "20px",
                   }}
                 >
-                  Rs. {stats.totalRevenue.toLocaleString("en-IN")}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>
+                      Pending Dues
+                    </span>
+                    <PendingDuesIcon />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 600,
+                      color: "#e05555",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    Rs. {stats.pendingDues.toLocaleString("en-IN")}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#555" }}>
+                    Unpaid orders
+                  </div>
                 </div>
-                <div style={{ fontSize: "11px", color: "#555" }}>
-                  From paid orders
+
+                {/* Card 3: Total Orders */}
+                <div
+                  style={{
+                    flexShrink: 0,
+                    width: "220px",
+                    height: "220px",
+                    background: "#161616",
+                    border: "1px solid #222",
+                    borderRadius: "14px",
+                    padding: "20px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>
+                      Total Orders
+                    </span>
+                    <TotalOrdersIcon />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 600,
+                      color: "#e8e8e8",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {stats.totalOrders}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#555" }}>All time</div>
+                </div>
+
+                {/* Card 4: This Month */}
+                <div
+                  style={{
+                    flexShrink: 0,
+                    width: "220px",
+                    height: "220px",
+                    background: "#161616",
+                    border: "1px solid #222",
+                    borderRadius: "14px",
+                    padding: "20px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "16px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>
+                      This Month
+                    </span>
+                    <ThisMonthIcon />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 600,
+                      color: "#378ADD",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {stats.ordersThisMonth}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#555" }}>
+                    Orders created
+                  </div>
+                </div>
+
+                {/* Card 5: Low Stock Alert */}
+                <div
+                  style={{
+                    flexShrink: 0,
+                    width: "220px",
+                    height: "220px",
+                    background: "#161616",
+                    border: "1px solid #222",
+                    borderRadius: "14px",
+                    padding: "20px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", color: "#555" }}>
+                      Low stock alert
+                    </span>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 18 18"
+                      fill="none"
+                      stroke={lowStockCount > 0 ? "#e8a020" : "#333"}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    >
+                      <path d="M9 2l7 14H2L9 2z" />
+                      <path d="M9 8v4M9 13.5v.5" />
+                    </svg>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "24px",
+                      fontWeight: 600,
+                      color: lowStockCount > 0 ? "#e8a020" : "#e8e8e8",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    {lowStockCount}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#555", marginBottom: "12px" }}>
+                    {lowStockCount === 0 ? "All items stocked" : "Items need restock"}
+                  </div>
+
+                  {/* Mini list of up to 3 low stock items */}
+                  {lowStockItems?.slice(0, 3).map((item, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "5px 0",
+                        borderTop: i === 0 ? "1px solid #1e1e1e" : "none",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          color: "#888",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: "140px",
+                        }}
+                      >
+                        {item.name}
+                        {item.variantLabel ? ` (${item.variantLabel})` : ""}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 500,
+                          flexShrink: 0,
+                          color: item.stock === 0 ? "#e05555" : "#e8a020",
+                          background: item.stock === 0 ? "#2b0a0a" : "#2b1a00",
+                          padding: "2px 6px",
+                          borderRadius: "10px",
+                          marginLeft: "6px",
+                        }}
+                      >
+                        {item.stock === 0 ? "Out" : `${item.stock} left`}
+                      </span>
+                    </div>
+                  ))}
+
+                  {lowStockCount > 3 && (
+                    <div style={{ fontSize: "10px", color: "#555", marginTop: "6px", textAlign: "right" }}>
+                      +{lowStockCount - 3} more
+                    </div>
+                  )}
+                </div>
+
+                {/* Card 6: Top Selling Item */}
+                <div
+                  style={{
+                    flexShrink: 0,
+                    width: "220px",
+                    height: "220px",
+                    background: "#161616",
+                    border: "1px solid #222",
+                    borderRadius: "14px",
+                    padding: "20px",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", color: "#555" }}>
+                      Top selling items
+                    </span>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 18 18"
+                      fill="none"
+                      stroke="#333"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    >
+                      <path d="M3 14l4-5 3 3 4-6" />
+                      <circle cx="15" cy="5" r="1.5" fill="#378ADD" stroke="none" />
+                    </svg>
+                  </div>
+
+                  {/* Top item highlight */}
+                  {topSellingItems?.[0] ? (
+                    <>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: 500,
+                          color: "#e8e8e8",
+                          marginBottom: "2px",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {topSellingItems[0].name}
+                      </div>
+                      <div style={{ fontSize: "11px", color: "#555", marginBottom: "12px" }}>
+                        {topSellingItems[0].totalQty} units sold
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          fontSize: "24px",
+                          fontWeight: 600,
+                          color: "#e8e8e8",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        —
+                      </div>
+                      <div style={{ fontSize: "11px", color: "#555", marginBottom: "12px" }}>
+                        No sales yet
+                      </div>
+                    </>
+                  )}
+
+                  {/* Ranked list */}
+                  <div
+                    className="top-sell-scroll"
+                    style={{
+                      maxHeight: "130px",
+                      overflowY: "auto",
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
+                      flex: 1,
+                    }}
+                  >
+                    {topSellingItems?.slice(0, 4).map((item, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          padding: "5px 0",
+                          borderTop: i === 0 ? "1px solid #1e1e1e" : "none",
+                        }}
+                      >
+                        <span style={{ fontSize: "10px", color: "#444", minWidth: "14px" }}>
+                          {i + 1}
+                        </span>
+
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "#888",
+                            flex: 1,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.name}
+                        </span>
+
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color: "#378ADD",
+                            background: "#0d1e2e",
+                            padding: "2px 6px",
+                            borderRadius: "10px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {item.totalQty}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Pending Dues Card */}
+              {/* Right fade hint */}
               <div
                 style={{
-                  background: "#161616",
-                  border: "1px solid #222",
-                  borderRadius: "14px",
-                  padding: "20px",
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: "60px",
+                  height: "calc(100% - 8px)",
+                  background: "linear-gradient(to right, transparent, #111)",
+                  pointerEvents: "none",
+                  borderRadius: "0 14px 14px 0",
                 }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <span
-                    style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}
-                  >
-                    Pending Dues
-                  </span>
-                  <PendingDuesIcon />
-                </div>
-                <div
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: 600,
-                    color: "#e05555",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Rs. {stats.pendingDues.toLocaleString("en-IN")}
-                </div>
-                <div style={{ fontSize: "11px", color: "#555" }}>
-                  Unpaid orders
-                </div>
-              </div>
-
-              {/* Total Orders Card */}
-              <div
-                style={{
-                  background: "#161616",
-                  border: "1px solid #222",
-                  borderRadius: "14px",
-                  padding: "20px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <span
-                    style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}
-                  >
-                    Total Orders
-                  </span>
-                  <TotalOrdersIcon />
-                </div>
-                <div
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: 600,
-                    color: "#e8e8e8",
-                    marginBottom: "8px",
-                  }}
-                >
-                  {stats.totalOrders}
-                </div>
-                <div style={{ fontSize: "11px", color: "#555" }}>All time</div>
-              </div>
-
-              {/* This Month Card */}
-              <div
-                style={{
-                  background: "#161616",
-                  border: "1px solid #222",
-                  borderRadius: "14px",
-                  padding: "20px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <span
-                    style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}
-                  >
-                    This Month
-                  </span>
-                  <ThisMonthIcon />
-                </div>
-                <div
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: 600,
-                    color: "#378ADD",
-                    marginBottom: "8px",
-                  }}
-                >
-                  {stats.ordersThisMonth}
-                </div>
-                <div style={{ fontSize: "11px", color: "#555" }}>
-                  Orders created
-                </div>
-              </div>
+              />
             </div>
 
             {/* Row 2: Chart + Calendar */}
@@ -396,27 +692,13 @@ export const Dashboard = () => {
                         }}
                       >
                         Rs. {stats.totalRevenue.toLocaleString("en-IN")}
-                        {trend > 0 && (
-                          <span
-                            style={{
-                              background: "#0d2b1a",
-                              color: "#3fcf8e",
-                              fontSize: "11px",
-                              padding: "2px 8px",
-                              borderRadius: "20px",
-                              fontWeight: 500,
-                            }}
-                          >
-                            ▲ {trend}%
-                          </span>
-                        )}
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: "8px" }}>
-                      {["Weekly", "Monthly", "Yearly"].map((range) => (
+                      {["weekly", "monthly", "yearly"].map((p) => (
                         <button
-                          key={range}
-                          onClick={() => setTimeRange(range.toLowerCase())}
+                          key={p}
+                          onClick={() => setPeriod(p)}
                           style={{
                             padding: "6px 12px",
                             fontSize: "12px",
@@ -425,17 +707,17 @@ export const Dashboard = () => {
                             border: "none",
                             cursor: "pointer",
                             background:
-                              timeRange === range.toLowerCase()
+                              period === p
                                 ? "#e8e8e8"
                                 : "transparent",
                             color:
-                              timeRange === range.toLowerCase()
+                              period === p
                                 ? "black"
                                 : "#555",
                             transition: "all 0.2s",
                           }}
                         >
-                          {range}
+                          {p.charAt(0).toUpperCase() + p.slice(1)}
                         </button>
                       ))}
                     </div>
@@ -444,21 +726,34 @@ export const Dashboard = () => {
                   <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={chartData}>
                       <CartesianGrid strokeOpacity={0} />
-                      <XAxis dataKey="month" stroke="#555" fontSize={11} />
+                      <XAxis 
+                        dataKey="label"
+                        stroke="#555"
+                        fontSize={11}
+                        axisLine={false}
+                        tickLine={false}
+                        interval={0}
+                      />
+                      <YAxis hide />
                       <Tooltip
                         contentStyle={{
                           background: "#1e1e1e",
                           border: "1px solid #333",
                           borderRadius: "8px",
-                          color: "white",
+                          color: "#e8e8e8",
+                          fontSize: "12px",
                         }}
                         cursor={{ fill: "#378ADD", opacity: 0.1 }}
+                        formatter={(val) => [`Rs. ${val.toLocaleString("en-IN")}`, "Revenue"]}
                       />
-                      <Bar
-                        dataKey="revenue"
-                        fill="#1e1e1e"
-                        radius={[8, 8, 0, 0]}
-                      />
+                      <Bar dataKey="revenue" radius={[8, 8, 0, 0]}>
+                        {chartData.map((entry, index) => (
+                          <Cell
+                            key={index}
+                            fill={index === chartData.length - 1 ? "#378ADD" : "#252525"}
+                          />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -467,7 +762,9 @@ export const Dashboard = () => {
               {/* Calendar Widget */}
               <CalendarWidget
                 ordersThisMonthRevenue={
-                  stats.ordersThisMonth > 0 ? stats.totalRevenue / 12 : 0
+                  chartData?.length > 0 
+                    ? chartData[chartData.length - 1]?.revenue || 0
+                    : 0
                 }
               />
             </div>
@@ -514,7 +811,7 @@ export const Dashboard = () => {
                 </button>
               </div>
 
-              {stats.recentOrders && stats.recentOrders.length > 0 ? (
+              {recentOrders && recentOrders.length > 0 ? (
                 <div className="hidden md:block overflow-x-auto">
                   <table style={{ width: "100%", fontSize: "14px" }}>
                     <thead
@@ -593,99 +890,66 @@ export const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {stats.recentOrders.map((order) => (
-                        <tr
-                          key={order._id}
-                          onClick={() =>
-                            navigate(`/dashboard/orders/${order._id}`)
-                          }
-                          style={{
-                            borderTop: "1px solid #222",
-                            cursor: "pointer",
-                            transition: "background 0.2s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#1a1a1a")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "transparent")
-                          }
-                        >
-                          <td
+                      {recentOrders.map((order, i) => {
+                        // Customer name — customerId is a populated object
+                        const customerName =
+                          order.customerId?.name || order.customerId || "Unknown";
+
+                        // Amount
+                        const amount = order.totalAmount
+                          ? `Rs. ${Number(order.totalAmount).toLocaleString(
+                              "en-IN"
+                            )}`
+                          : "Rs. 0";
+
+                        // Date — fix Invalid Date
+                        const dateStr = order.createdAt
+                          ? new Date(order.createdAt).toLocaleDateString(
+                              "en-IN",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )
+                          : "—";
+
+                        // Invoice number
+                        const invoiceNum = order.invoiceNumber || "N/A";
+
+                        return (
+                          <tr
+                            key={order._id || i}
+                            onClick={() =>
+                              navigate(`/dashboard/orders/${order._id}`)
+                            }
                             style={{
-                              padding: "12px",
-                              color: "white",
-                              fontFamily: "monospace",
-                              fontWeight: 600,
-                              fontSize: "12px",
+                              borderBottom: "1px solid #1e1e1e",
+                              transition: "background 0.15s",
+                              cursor: "pointer",
                             }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background = "#1a1a1a")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background = "transparent")
+                            }
                           >
-                            {order.invoiceNumber || "N/A"}
-                          </td>
-                          <td
-                            style={{
-                              padding: "12px",
-                              color: "white",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {order.customerName}
-                          </td>
-                          <td
-                            style={{
-                              padding: "12px",
-                              color: "white",
-                              fontWeight: 600,
-                              fontSize: "12px",
-                            }}
-                          >
-                            Rs. {order.amount?.toLocaleString("en-IN")}
-                          </td>
-                          <td style={{ padding: "12px" }}>
-                            <span
-                              className={getOrderStatusBadgeColor(
-                                order.orderStatus,
-                              )}
-                              style={{
-                                padding: "4px 8px",
-                                fontSize: "12px",
-                                fontWeight: 600,
-                                display: "inline-block",
-                                borderRadius: "4px",
-                              }}
-                            >
-                              {order.orderStatus?.charAt(0).toUpperCase() +
-                                order.orderStatus?.slice(1)}
-                            </span>
-                          </td>
-                          <td style={{ padding: "12px" }}>
-                            <span
-                              className={getPaymentStatusBadgeColor(
-                                order.paymentStatus,
-                              )}
-                              style={{
-                                padding: "4px 8px",
-                                fontSize: "12px",
-                                fontWeight: 600,
-                                display: "inline-block",
-                                borderRadius: "4px",
-                              }}
-                            >
-                              {order.paymentStatus?.charAt(0).toUpperCase() +
-                                order.paymentStatus?.slice(1)}
-                            </span>
-                          </td>
-                          <td
-                            style={{
-                              padding: "12px",
-                              color: "#888",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {new Date(order.date).toLocaleDateString()}
-                          </td>
-                        </tr>
-                      ))}
+                            <td style={tdStyle}>{invoiceNum}</td>
+                            <td style={tdStyle}>{customerName}</td>
+                            <td style={tdStyle}>{amount}</td>
+                            <td style={tdStyle}>
+                              <StatusPill status={order.orderStatus} />
+                            </td>
+                            <td style={tdStyle}>
+                              <StatusPill status={order.paymentStatus} />
+                            </td>
+                            <td style={{ ...tdStyle, color: "#555" }}>
+                              {dateStr}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
