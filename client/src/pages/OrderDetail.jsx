@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api";
 
@@ -70,7 +71,11 @@ export const OrderDetail = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Failed to download invoice");
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to download invoice",
+      );
     } finally {
       setDownloadingInvoice(false);
     }
@@ -103,23 +108,23 @@ export const OrderDetail = () => {
   };
 
   return (
-    <div className="grid grid-cols-[auto_1fr] h-screen bg-[#111]">
+    <div className="relative min-h-screen bg-[#111]">
       <Sidebar />
+      <Navbar />
 
-      <div className="overflow-auto">
+      <div className="ml-[232px] pt-[92px] overflow-auto">
         {/* Header */}
         <div className="bg-[#161616] border-b border-[#222] px-4 sm:px-6 md:px-8 py-4 sm:py-5">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <button
-              onClick={() => navigate("/dashboard/orders")}
-              className="text-[#378ADD] hover:text-blue-400 text-xs sm:text-sm font-semibold transition whitespace-nowrap"
-            >
-              ← Back to Orders
-            </button>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Order Details</h1>
-          </div>
+          <button
+            onClick={() => navigate("/dashboard/orders")}
+            className="text-[#378ADD] hover:text-blue-400 text-xs sm:text-sm font-semibold transition whitespace-nowrap mb-3"
+          >
+            ← Back to Orders
+          </button>
           {order && (
-            <p className="text-gray-400 text-xs sm:text-sm">Invoice #{order.invoiceNumber || "Not generated"}</p>
+            <p className="text-gray-400 text-xs sm:text-sm">
+              Invoice #{order.invoiceNumber || "Not generated"}
+            </p>
           )}
         </div>
 
@@ -145,24 +150,34 @@ export const OrderDetail = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Customer Info */}
                 <div className="bg-[#161616] rounded-lg border border-[#222] p-6">
-                  <h2 className="text-lg font-bold text-white mb-4">Customer Information</h2>
+                  <h2 className="text-lg font-bold text-white mb-4">
+                    Customer Information
+                  </h2>
                   <div className="space-y-3">
                     <div>
                       <div className="text-gray-400 text-sm">Name</div>
-                      <div className="text-white font-semibold">{order.customerId?.name || "N/A"}</div>
+                      <div className="text-white font-semibold">
+                        {order.customerId?.name || "N/A"}
+                      </div>
                     </div>
                     <div>
                       <div className="text-gray-400 text-sm">Email</div>
-                      <div className="text-white">{order.customerId?.email || "N/A"}</div>
+                      <div className="text-white">
+                        {order.customerId?.email || "N/A"}
+                      </div>
                     </div>
                     <div>
                       <div className="text-gray-400 text-sm">Phone</div>
-                      <div className="text-white">{order.customerId?.phone || "N/A"}</div>
+                      <div className="text-white">
+                        {order.customerId?.phone || "N/A"}
+                      </div>
                     </div>
                     {order.customerId?.address && (
                       <div>
                         <div className="text-gray-400 text-sm">Address</div>
-                        <div className="text-white">{order.customerId.address}</div>
+                        <div className="text-white">
+                          {order.customerId.address}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -170,10 +185,14 @@ export const OrderDetail = () => {
 
                 {/* Order Status */}
                 <div className="bg-[#161616] rounded-lg border border-[#222] p-6">
-                  <h2 className="text-lg font-bold text-white mb-4">Order Status</h2>
+                  <h2 className="text-lg font-bold text-white mb-4">
+                    Order Status
+                  </h2>
                   <div className="space-y-4">
                     <div>
-                      <div className="text-gray-400 text-sm mb-2">Order Status</div>
+                      <div className="text-gray-400 text-sm mb-2">
+                        Order Status
+                      </div>
                       <select
                         value={order.orderStatus}
                         className={`w-full px-3 py-2 rounded text-sm font-semibold focus:outline-none cursor-pointer ${getOrderStatusBadgeColor(
@@ -187,7 +206,9 @@ export const OrderDetail = () => {
                       </select>
                     </div>
                     <div>
-                      <div className="text-gray-400 text-sm mb-2">Payment Status</div>
+                      <div className="text-gray-400 text-sm mb-2">
+                        Payment Status
+                      </div>
                       <select
                         value={order.paymentStatus}
                         className={`w-full px-3 py-2 rounded text-sm font-semibold focus:outline-none cursor-pointer ${getPaymentStatusBadgeColor(
@@ -201,7 +222,9 @@ export const OrderDetail = () => {
                       </select>
                     </div>
                     <div>
-                      <div className="text-gray-400 text-sm mb-2">Order Date</div>
+                      <div className="text-gray-400 text-sm mb-2">
+                        Order Date
+                      </div>
                       <div className="text-white">
                         {new Date(order.createdAt).toLocaleDateString()}
                       </div>
@@ -232,18 +255,24 @@ export const OrderDetail = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {order.items && order.items.map((item, idx) => (
-                        <tr key={idx} className="border-t border-[#222]">
-                          <td className="px-4 py-3 text-white">{item.name}</td>
-                          <td className="px-4 py-3 text-white">{item.quantity}</td>
-                          <td className="px-4 py-3 text-white">
-                            Rs. {item.price?.toLocaleString()}
-                          </td>
-                          <td className="px-4 py-3 text-right text-white font-semibold">
-                            Rs. {(item.quantity * item.price)?.toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
+                      {order.items &&
+                        order.items.map((item, idx) => (
+                          <tr key={idx} className="border-t border-[#222]">
+                            <td className="px-4 py-3 text-white">
+                              {item.name}
+                            </td>
+                            <td className="px-4 py-3 text-white">
+                              {item.quantity}
+                            </td>
+                            <td className="px-4 py-3 text-white">
+                              Rs. {item.price?.toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3 text-right text-white font-semibold">
+                              Rs.{" "}
+                              {(item.quantity * item.price)?.toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -253,7 +282,9 @@ export const OrderDetail = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Total */}
                 <div className="bg-[#161616] rounded-lg border border-[#222] p-6">
-                  <h2 className="text-lg font-bold text-white mb-4">Order Summary</h2>
+                  <h2 className="text-lg font-bold text-white mb-4">
+                    Order Summary
+                  </h2>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Subtotal:</span>
@@ -262,7 +293,9 @@ export const OrderDetail = () => {
                       </span>
                     </div>
                     <div className="border-t border-[#222] pt-3 flex justify-between">
-                      <span className="text-white font-bold text-lg">Total Amount:</span>
+                      <span className="text-white font-bold text-lg">
+                        Total Amount:
+                      </span>
                       <span className="text-[#378ADD] font-bold text-lg">
                         Rs. {order.totalAmount?.toLocaleString()}
                       </span>
@@ -285,9 +318,7 @@ export const OrderDetail = () => {
                           Generating Invoice...
                         </>
                       ) : (
-                        <>
-                          📥 Download Invoice
-                        </>
+                        <>📥 Download Invoice</>
                       )}
                     </button>
                   </div>

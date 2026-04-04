@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
 import { AuthContext } from "../context/AuthContext";
 
 export const AddOrder = () => {
@@ -16,7 +17,7 @@ export const AddOrder = () => {
     items: [{ itemId: "", quantity: 1, price: 0, priceOverride: false }],
     notes: "",
   });
-  
+
   // Customer creation inline form states
   const [showCreateCustomerForm, setShowCreateCustomerForm] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -35,13 +36,16 @@ export const AddOrder = () => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-        
+
         // Fetch customers
-        const customersRes = await fetch("http://localhost:5000/api/customers", {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const customersRes = await fetch(
+          "http://localhost:5000/api/customers",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
         if (!customersRes.ok) throw new Error("Failed to fetch customers");
         const customersData = await customersRes.json();
         setCustomers(customersData.customers || []);
@@ -68,7 +72,7 @@ export const AddOrder = () => {
 
   // Get flattened list of all variants from grouped items
   // NO LONGER NEEDED - catalogItems is already flat from /flat endpoint
-  
+
   // Get item details by ID (now simple since items are already flat)
   const getItemById = (itemId) => {
     return catalogItems.find((item) => item._id === itemId);
@@ -86,7 +90,7 @@ export const AddOrder = () => {
 
   const handleCustomerChange = (e) => {
     const value = e.target.value;
-    
+
     if (value === "CREATE_NEW") {
       setShowCreateCustomerForm(true);
       setCustomerSearch("");
@@ -211,9 +215,10 @@ export const AddOrder = () => {
   };
 
   // Filter customers based on search
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
-    customer.email.toLowerCase().includes(customerSearch.toLowerCase())
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
+      customer.email.toLowerCase().includes(customerSearch.toLowerCase()),
   );
 
   // Get available stock for an item/variant combination
@@ -233,9 +238,17 @@ export const AddOrder = () => {
     if (availableStock === 0) {
       return { color: "text-red-400", icon: "🔴", text: "Out of stock" };
     } else if (availableStock <= 10) {
-      return { color: "text-amber-400", icon: "🟡", text: `${availableStock} in stock` };
+      return {
+        color: "text-amber-400",
+        icon: "🟡",
+        text: `${availableStock} in stock`,
+      };
     }
-    return { color: "text-gray-400", icon: "●", text: `${availableStock} in stock` };
+    return {
+      color: "text-gray-400",
+      icon: "●",
+      text: `${availableStock} in stock`,
+    };
   };
 
   const handleItemChange = (index, field, value) => {
@@ -253,7 +266,8 @@ export const AddOrder = () => {
     } else if (field === "quantity") {
       updatedItems[index].quantity = parseInt(value) || 0;
     } else if (field === "price") {
-      updatedItems[index].price = Math.round(parseFloat(value) * 100) / 100 || 0;
+      updatedItems[index].price =
+        Math.round(parseFloat(value) * 100) / 100 || 0;
       updatedItems[index].priceOverride = true;
     } else if (field === "priceOverride") {
       updatedItems[index].priceOverride = !updatedItems[index].priceOverride;
@@ -272,7 +286,10 @@ export const AddOrder = () => {
   const addItem = () => {
     setFormData((prev) => ({
       ...prev,
-      items: [...prev.items, { itemId: "", quantity: 1, price: 0, priceOverride: false }],
+      items: [
+        ...prev.items,
+        { itemId: "", quantity: 1, price: 0, priceOverride: false },
+      ],
     }));
   };
 
@@ -368,7 +385,9 @@ export const AddOrder = () => {
       if (data.warnings && data.warnings.length > 0) {
         toast.custom((t) => (
           <div className="bg-amber-900 border border-amber-700 rounded-lg p-4 text-amber-100 max-w-md">
-            <p className="font-semibold mb-2">Order created with stock warnings:</p>
+            <p className="font-semibold mb-2">
+              Order created with stock warnings:
+            </p>
             <ul className="text-sm space-y-1">
               {data.warnings.map((warning, idx) => (
                 <li key={idx}>• {warning}</li>
@@ -397,18 +416,11 @@ export const AddOrder = () => {
   const totalAmount = calculateTotal();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] h-screen bg-[#111]">
+    <div className="relative min-h-screen bg-[#111]">
       <Sidebar />
+      <Navbar />
 
-      <div className="overflow-auto flex flex-col">
-        {/* Header */}
-        <div className="bg-[#161616] border-b border-[#222] px-4 sm:px-6 py-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">Create New Order</h1>
-          <p className="text-gray-400 text-xs sm:text-sm mt-1">
-            Add items and create an order for your customer
-          </p>
-        </div>
-
+      <div className="ml-[232px] pt-[92px] overflow-auto flex flex-col">
         {/* Content */}
         <div className="flex-1 overflow-auto p-4 sm:p-6">
           <form onSubmit={handleSubmit} className="max-w-4xl">
@@ -424,7 +436,7 @@ export const AddOrder = () => {
               <label className="block text-gray-300 font-semibold mb-2 text-xs sm:text-sm">
                 Select Customer *
               </label>
-              
+
               {/* Searchable Dropdown */}
               <div className="relative">
                 <input
@@ -438,7 +450,7 @@ export const AddOrder = () => {
                     errors.customerId ? "border-red-600" : "border-[#222]"
                   }`}
                 />
-                
+
                 {/* Dropdown List */}
                 {showDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-[#111] border border-[#222] rounded-lg z-10 shadow-lg max-h-48 overflow-y-auto">
@@ -462,10 +474,12 @@ export const AddOrder = () => {
                         className="w-full text-left px-3 sm:px-4 py-2 hover:bg-[#1a1a1a] border-b border-[#222] text-white text-xs sm:text-sm transition"
                       >
                         <div className="font-medium">{customer.name}</div>
-                        <div className="text-gray-500 text-xs">{customer.email}</div>
+                        <div className="text-gray-500 text-xs">
+                          {customer.email}
+                        </div>
                       </button>
                     ))}
-                    
+
                     {/* Create New Customer Option */}
                     <button
                       type="button"
@@ -491,10 +505,14 @@ export const AddOrder = () => {
               )}
 
               {errors.customerId && (
-                <p className="text-red-400 text-xs sm:text-sm mt-2">{errors.customerId}</p>
+                <p className="text-red-400 text-xs sm:text-sm mt-2">
+                  {errors.customerId}
+                </p>
               )}
               {errors.customers && (
-                <p className="text-red-400 text-xs sm:text-sm mt-2">{errors.customers}</p>
+                <p className="text-red-400 text-xs sm:text-sm mt-2">
+                  {errors.customers}
+                </p>
               )}
 
               {/* Inline Create Customer Form */}
@@ -522,11 +540,15 @@ export const AddOrder = () => {
                       onChange={handleNewCustomerFormChange}
                       placeholder="Enter customer name"
                       className={`w-full bg-[#111] border rounded px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] text-xs sm:text-sm transition ${
-                        customerFormErrors.name ? "border-red-600" : "border-[#222]"
+                        customerFormErrors.name
+                          ? "border-red-600"
+                          : "border-[#222]"
                       }`}
                     />
                     {customerFormErrors.name && (
-                      <p className="text-red-400 text-xs mt-1">{customerFormErrors.name}</p>
+                      <p className="text-red-400 text-xs mt-1">
+                        {customerFormErrors.name}
+                      </p>
                     )}
                   </div>
 
@@ -542,11 +564,15 @@ export const AddOrder = () => {
                       onChange={handleNewCustomerFormChange}
                       placeholder="Enter email address"
                       className={`w-full bg-[#111] border rounded px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] text-xs sm:text-sm transition ${
-                        customerFormErrors.email ? "border-red-600" : "border-[#222]"
+                        customerFormErrors.email
+                          ? "border-red-600"
+                          : "border-[#222]"
                       }`}
                     />
                     {customerFormErrors.email && (
-                      <p className="text-red-400 text-xs mt-1">{customerFormErrors.email}</p>
+                      <p className="text-red-400 text-xs mt-1">
+                        {customerFormErrors.email}
+                      </p>
                     )}
                   </div>
 
@@ -619,7 +645,9 @@ export const AddOrder = () => {
               </div>
 
               {errors.items && (
-                <p className="text-red-400 text-xs sm:text-sm mb-4">{errors.items}</p>
+                <p className="text-red-400 text-xs sm:text-sm mb-4">
+                  {errors.items}
+                </p>
               )}
 
               {/* No items in catalog warning */}
@@ -627,8 +655,12 @@ export const AddOrder = () => {
                 <div className="bg-amber-900 bg-opacity-20 border border-[#e8a020] rounded-lg p-3 sm:p-4 mb-4 flex items-start gap-3">
                   <span className="text-[#e8a020] text-lg">⚠️</span>
                   <div>
-                    <p className="text-[#e8a020] text-xs sm:text-sm font-semibold">No items in catalog</p>
-                    <p className="text-gray-400 text-xs mt-1">Add items first to create orders.</p>
+                    <p className="text-[#e8a020] text-xs sm:text-sm font-semibold">
+                      No items in catalog
+                    </p>
+                    <p className="text-gray-400 text-xs mt-1">
+                      Add items first to create orders.
+                    </p>
                     <button
                       type="button"
                       onClick={() => navigate("/dashboard/items")}
@@ -668,7 +700,8 @@ export const AddOrder = () => {
                   <tbody>
                     {formData.items.map((item, index) => {
                       const selectedItem = getItemById(item.itemId);
-                      const itemAmount = (item.price || 0) * (item.quantity || 0);
+                      const itemAmount =
+                        (item.price || 0) * (item.quantity || 0);
 
                       return (
                         <tr
@@ -680,20 +713,26 @@ export const AddOrder = () => {
                             <select
                               value={item.itemId}
                               onChange={(e) =>
-                                handleItemChange(index, "itemId", e.target.value)
+                                handleItemChange(
+                                  index,
+                                  "itemId",
+                                  e.target.value,
+                                )
                               }
                               className="w-full bg-[#111] border border-[#222] rounded px-2 py-1 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] text-xs sm:text-sm"
                             >
                               <option value="">-- Select item --</option>
                               {catalogItems.map((item) => (
-                                <option 
-                                  key={item._id} 
+                                <option
+                                  key={item._id}
                                   value={item._id}
                                   disabled={item.stock === 0}
                                 >
                                   {item.name}
-                                  {item.variantLabel ? ` — ${item.variantLabel}` : ""}
-                                  {" "} ({item.stock} in stock)
+                                  {item.variantLabel
+                                    ? ` — ${item.variantLabel}`
+                                    : ""}{" "}
+                                  ({item.stock} in stock)
                                   {item.stock === 0 ? " — Out of stock" : ""}
                                 </option>
                               ))}
@@ -703,7 +742,9 @@ export const AddOrder = () => {
                           {/* Stock Status Display */}
                           <td className="px-2 sm:px-3 py-2">
                             {selectedItem && (
-                              <div className={`text-xs ${getStockStatus(selectedItem.stock).color}`}>
+                              <div
+                                className={`text-xs ${getStockStatus(selectedItem.stock).color}`}
+                              >
                                 {getStockStatus(selectedItem.stock).text}
                               </div>
                             )}
@@ -715,7 +756,11 @@ export const AddOrder = () => {
                               type="number"
                               value={item.quantity}
                               onChange={(e) =>
-                                handleItemChange(index, "quantity", e.target.value)
+                                handleItemChange(
+                                  index,
+                                  "quantity",
+                                  e.target.value,
+                                )
                               }
                               min="1"
                               className="w-16 sm:w-20 bg-[#111] border border-[#222] rounded px-2 py-1 text-white focus:outline-none focus:border-[#378ADD] text-xs sm:text-sm"
@@ -730,14 +775,20 @@ export const AddOrder = () => {
                                   type="number"
                                   value={item.price}
                                   onChange={(e) =>
-                                    handleItemChange(index, "price", e.target.value)
+                                    handleItemChange(
+                                      index,
+                                      "price",
+                                      e.target.value,
+                                    )
                                   }
                                   min="0"
                                   step="0.01"
                                   placeholder="0.00"
                                   disabled={!item.priceOverride}
                                   className={`w-full sm:w-24 bg-[#111] border border-[#222] rounded px-2 py-1 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] text-xs sm:text-sm ${
-                                    !item.priceOverride ? "opacity-60 cursor-not-allowed" : ""
+                                    !item.priceOverride
+                                      ? "opacity-60 cursor-not-allowed"
+                                      : ""
                                   }`}
                                 />
                               </div>
@@ -752,7 +803,11 @@ export const AddOrder = () => {
                                       ? "bg-[#378ADD] text-white"
                                       : "bg-[#222] text-gray-400 hover:bg-[#333]"
                                   }`}
-                                  title={item.priceOverride ? "Click to reset price" : "Click to edit price"}
+                                  title={
+                                    item.priceOverride
+                                      ? "Click to reset price"
+                                      : "Click to edit price"
+                                  }
                                 >
                                   {item.priceOverride ? "✎" : "🔒"}
                                 </button>

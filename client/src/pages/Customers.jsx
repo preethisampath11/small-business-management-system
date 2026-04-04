@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
 import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api";
 
@@ -247,7 +248,10 @@ export const Customers = () => {
       document.body.removeChild(link);
       toast.success("Invoice downloaded successfully!");
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message || "Failed to download invoice";
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to download invoice";
       toast.error(errorMsg);
     } finally {
       setDownloadingInvoiceId(null);
@@ -596,26 +600,19 @@ export const Customers = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] h-screen bg-[#111]">
+    <div className="relative min-h-screen bg-[#111]">
       <Sidebar />
+      <Navbar />
 
-      <div className="overflow-auto">
-        {/* Header */}
-        <div className="bg-[#161616] border-b border-[#222] px-4 sm:px-6 md:px-8 py-4 sm:py-5">
-          <div className="grid grid-cols-[1fr_auto] items-start gap-3 sm:gap-4">
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white truncate\">Customers</h1>
-              <p className="text-gray-400 text-xs sm:text-sm mt-1\">
-                Manage your customer database
-              </p>
-            </div>
-            <button
-              onClick={() => openModal()}
-              className="bg-[#378ADD] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition font-semibold text-xs sm:text-sm whitespace-nowrap\"
-            >
-              + Add Customer
-            </button>
-          </div>
+      <div className="ml-[232px] pt-[92px]">
+        {/* Action Button */}
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={() => openModal()}
+            className="bg-[#378ADD] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition font-semibold text-xs sm:text-sm whitespace-nowrap"
+          >
+            + Add Customer
+          </button>
         </div>
 
         {/* Content */}

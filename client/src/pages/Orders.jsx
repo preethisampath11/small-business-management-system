@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api";
 
@@ -162,7 +163,10 @@ export const Orders = () => {
       document.body.removeChild(link);
       toast.success("Invoice downloaded successfully!");
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message || "Failed to download invoice";
+      const errorMsg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to download invoice";
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -208,34 +212,32 @@ export const Orders = () => {
   ).length;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] h-screen bg-[#111]">
+    <div className="relative min-h-screen bg-[#111]">
       <Sidebar />
+      <Navbar />
 
-      <div className="overflow-auto flex flex-col">
+      <div className="ml-[232px] pt-[92px] p-4 sm:p-6">
+        {/* Action Button */}
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={() => navigate("/dashboard/orders/add")}
+            className="bg-[#378ADD] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition font-semibold text-xs sm:text-sm whitespace-nowrap"
+          >
+            + New Order
+          </button>
+        </div>
+
         {/* Header */}
-        <div className="bg-[#161616] border-b border-[#222] px-4 sm:px-6 py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start gap-3 sm:gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">Orders</h1>
-              <p className="text-gray-400 text-xs sm:text-sm mt-1">
-                Manage your sales and invoices
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/dashboard/orders/add")}
-              className="bg-[#378ADD] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition font-semibold text-xs sm:text-sm whitespace-nowrap"
-            >
-              + New Order
-            </button>
-          </div>
-
+        <div className="bg-[#161616] border-b border-[#222] px-4 sm:px-6 py-4 -mx-4 sm:-mx-6">
           {/* Quick Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
             <div className="bg-[#111] rounded border border-[#222] p-2.5 sm:p-3">
               <div className="text-gray-400 text-xs font-semibold uppercase">
                 Total Orders
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-white">{totalOrders}</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">
+                {totalOrders}
+              </div>
             </div>
             <div className="bg-[#111] rounded border border-[#222] p-2.5 sm:p-3">
               <div className="text-gray-400 text-xs font-semibold uppercase">
@@ -432,16 +434,16 @@ export const Orders = () => {
                               View
                             </button>
                             <button
-                              onClick={() =>
-                                handleDownloadInvoice(order._id)
-                              }
+                              onClick={() => handleDownloadInvoice(order._id)}
                               disabled={downloadingInvoiceId === order._id}
                               className="text-green-400 hover:text-green-300 text-xs sm:text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
                             >
                               {downloadingInvoiceId === order._id ? (
                                 <>
                                   <span className="animate-spin">⏳</span>
-                                  <span className="hidden sm:inline">Loading</span>
+                                  <span className="hidden sm:inline">
+                                    Loading
+                                  </span>
                                 </>
                               ) : (
                                 "Invoice"
@@ -464,17 +466,29 @@ export const Orders = () => {
                   >
                     <div className="flex justify-between items-start gap-2">
                       <div className="min-w-0 flex-1">
-                        <div className="text-gray-400 text-xs font-semibold mb-1">Customer</div>
-                        <div className="text-white font-semibold text-sm truncate">{order.customerId?.name || "Unknown"}</div>
-                        <div className="text-gray-500 text-xs truncate">{order.customerId?.email}</div>
+                        <div className="text-gray-400 text-xs font-semibold mb-1">
+                          Customer
+                        </div>
+                        <div className="text-white font-semibold text-sm truncate">
+                          {order.customerId?.name || "Unknown"}
+                        </div>
+                        <div className="text-gray-500 text-xs truncate">
+                          {order.customerId?.email}
+                        </div>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <div className="text-gray-400 text-xs font-semibold mb-1">Amount</div>
-                        <div className="text-white font-semibold text-sm">Rs.{order.totalAmount?.toLocaleString()}</div>
+                        <div className="text-gray-400 text-xs font-semibold mb-1">
+                          Amount
+                        </div>
+                        <div className="text-white font-semibold text-sm">
+                          Rs.{order.totalAmount?.toLocaleString()}
+                        </div>
                       </div>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span>
+                      <span className="text-gray-400">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <select
@@ -493,10 +507,7 @@ export const Orders = () => {
                       <select
                         value={order.paymentStatus}
                         onChange={(e) =>
-                          handlePaymentStatusChange(
-                            order._id,
-                            e.target.value,
-                          )
+                          handlePaymentStatusChange(order._id, e.target.value)
                         }
                         className={`px-2 py-1 rounded text-xs font-semibold focus:outline-none cursor-pointer ${getPaymentStatusBadgeColor(
                           order.paymentStatus,
@@ -517,9 +528,7 @@ export const Orders = () => {
                         View
                       </button>
                       <button
-                        onClick={() =>
-                          handleDownloadInvoice(order._id)
-                        }
+                        onClick={() => handleDownloadInvoice(order._id)}
                         disabled={downloadingInvoiceId === order._id}
                         className="flex-1 text-green-400 hover:text-green-300 text-xs font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1 bg-[#111] border border-green-400 rounded px-2 py-1.5"
                       >

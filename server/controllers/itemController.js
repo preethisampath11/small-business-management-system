@@ -50,10 +50,12 @@ export const getItems = async (req, res) => {
 // @access  Private
 export const getItemsFlat = async (req, res) => {
   try {
-    const items = await Item.find({ userId: req.user.id, isActive: true }).sort({
-      name: 1,
-      variantLabel: 1,
-    });
+    const items = await Item.find({ userId: req.user.id, isActive: true }).sort(
+      {
+        name: 1,
+        variantLabel: 1,
+      },
+    );
 
     res.status(200).json({
       success: true,
@@ -106,7 +108,17 @@ export const getItemById = async (req, res) => {
 // @access  Private
 export const createItem = async (req, res) => {
   try {
-    const { name, description, category, price, unit, stock, variants, imageUrl, isActive } = req.body;
+    const {
+      name,
+      description,
+      category,
+      price,
+      unit,
+      stock,
+      variants,
+      imageUrl,
+      isActive,
+    } = req.body;
 
     // Validation
     if (!name || !price) {
@@ -171,7 +183,17 @@ export const createItem = async (req, res) => {
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, category, price, unit, stock, variants, imageUrl, isActive } = req.body;
+    const {
+      name,
+      description,
+      category,
+      price,
+      unit,
+      stock,
+      variants,
+      imageUrl,
+      isActive,
+    } = req.body;
 
     // Check if id is a valid ObjectId
     const isValidObjectId = mongoose.Types.ObjectId.isValid(id);
@@ -212,7 +234,10 @@ export const updateItem = async (req, res) => {
       const itemName = decodeURIComponent(id);
 
       // Get all variants with this name to verify ownership
-      const existingItems = await Item.find({ userId: req.user.id, name: itemName });
+      const existingItems = await Item.find({
+        userId: req.user.id,
+        name: itemName,
+      });
 
       if (existingItems.length === 0) {
         return res.status(404).json({
@@ -235,7 +260,7 @@ export const updateItem = async (req, res) => {
       if (Object.keys(groupUpdateData).length > 0) {
         await Item.updateMany(
           { userId: req.user.id, name: itemName },
-          { $set: groupUpdateData }
+          { $set: groupUpdateData },
         );
       }
 
@@ -245,15 +270,23 @@ export const updateItem = async (req, res) => {
           if (variant._id && variant.stock !== undefined) {
             await Item.findByIdAndUpdate(
               variant._id,
-              { $set: { stock: variant.stock, variantLabel: variant.variantLabel } },
-              { new: true }
+              {
+                $set: {
+                  stock: variant.stock,
+                  variantLabel: variant.variantLabel,
+                },
+              },
+              { new: true },
             );
           }
         }
       }
 
       // Fetch updated items
-      items = await Item.find({ userId: req.user.id, name: groupUpdateData.name || itemName });
+      items = await Item.find({
+        userId: req.user.id,
+        name: groupUpdateData.name || itemName,
+      });
     }
 
     res.status(200).json({
@@ -282,7 +315,7 @@ export const deleteItem = async (req, res) => {
         _id: new mongoose.Types.ObjectId(id),
         userId: new mongoose.Types.ObjectId(req.user.id),
       },
-      { $set: { isActive: false } }
+      { $set: { isActive: false } },
     );
 
     console.log("[DELETE ITEM] Update result:", result);
@@ -316,8 +349,12 @@ export const deleteItemGroup = async (req, res) => {
     console.log("[DELETE GROUP] Attempting to delete group:", itemName);
 
     const result = await Item.updateMany(
-      { userId: new mongoose.Types.ObjectId(req.user.id), name: itemName, isActive: true },
-      { $set: { isActive: false } }
+      {
+        userId: new mongoose.Types.ObjectId(req.user.id),
+        name: itemName,
+        isActive: true,
+      },
+      { $set: { isActive: false } },
     );
 
     console.log("[DELETE GROUP] Update result:", result);

@@ -104,19 +104,22 @@ export const createOrder = async (req, res) => {
       const availableStock = catalogItem.stock || 0;
 
       if (item.quantity > availableStock) {
-        const variantText = catalogItem.variantLabel ? ` (${catalogItem.variantLabel})` : "";
+        const variantText = catalogItem.variantLabel
+          ? ` (${catalogItem.variantLabel})`
+          : "";
         warnings.push(
-          `${catalogItem.name}${variantText} — only ${availableStock} in stock, ordered ${item.quantity}`
+          `${catalogItem.name}${variantText} — only ${availableStock} in stock, ordered ${item.quantity}`,
         );
       }
     }
 
     // Calculate total amount from items (with proper rounding for float precision)
-    const totalAmount = Math.round(
-      items.reduce((sum, item) => {
-        return sum + item.quantity * item.price;
-      }, 0) * 100
-    ) / 100;
+    const totalAmount =
+      Math.round(
+        items.reduce((sum, item) => {
+          return sum + item.quantity * item.price;
+        }, 0) * 100,
+      ) / 100;
 
     const order = await Order.create({
       userId: req.user.id,
@@ -139,7 +142,7 @@ export const createOrder = async (req, res) => {
         // Include userId verification to ensure we only update the correct user's items
         await Item.updateOne(
           { _id: item.itemId, userId: req.user.id },
-          { $inc: { stock: -item.quantity } }
+          { $inc: { stock: -item.quantity } },
         );
       }
     } catch (stockError) {
@@ -280,7 +283,7 @@ export const getInvoice = async (req, res) => {
         invoiceNumber: { $exists: true },
       });
       invoiceNumber = `INV-${String(orderCount + 1).padStart(3, "0")}`;
-      
+
       // Update the order with the generated invoice number
       order.invoiceNumber = invoiceNumber;
       await order.save();
@@ -288,7 +291,9 @@ export const getInvoice = async (req, res) => {
 
     // Prepare invoice data with validation
     if (!order.items || order.items.length === 0) {
-      console.error("Invalid Order: No items found", { orderId: req.params.id });
+      console.error("Invalid Order: No items found", {
+        orderId: req.params.id,
+      });
       return res.status(400).json({
         success: false,
         message: "Invalid order: no items found",
@@ -296,7 +301,9 @@ export const getInvoice = async (req, res) => {
     }
 
     if (!order.customerId || !order.customerId.name) {
-      console.error("Invalid Order: Customer not properly populated", { orderId: req.params.id });
+      console.error("Invalid Order: Customer not properly populated", {
+        orderId: req.params.id,
+      });
       return res.status(400).json({
         success: false,
         message: "Invalid order: customer not found",
@@ -304,7 +311,9 @@ export const getInvoice = async (req, res) => {
     }
 
     if (!order.userId || !order.userId.email) {
-      console.error("Invalid Order: User not properly populated", { orderId: req.params.id });
+      console.error("Invalid Order: User not properly populated", {
+        orderId: req.params.id,
+      });
       return res.status(400).json({
         success: false,
         message: "Invalid order: seller not found",
@@ -317,14 +326,17 @@ export const getInvoice = async (req, res) => {
       sellerName: order.userId.businessName || order.userId.name,
       sellerEmail: order.userId.email,
       customerName: order.customerId.name,
-      customerEmail: order.customerId.email || '',
-      customerPhone: order.customerId.phone || '',
-      customerAddress: order.customerId.address || '',
+      customerEmail: order.customerId.email || "",
+      customerPhone: order.customerId.phone || "",
+      customerAddress: order.customerId.address || "",
       items: order.items,
       totalAmount: order.totalAmount,
     };
 
-    console.log("Invoice Data Being Sent:", JSON.stringify(invoiceData, null, 2));
+    console.log(
+      "Invoice Data Being Sent:",
+      JSON.stringify(invoiceData, null, 2),
+    );
 
     // Generate PDF
     const pdfBuffer = await generateInvoicePDF(invoiceData);
@@ -335,7 +347,7 @@ export const getInvoice = async (req, res) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="Invoice-${invoiceNumber}.pdf"`
+      `attachment; filename="Invoice-${invoiceNumber}.pdf"`,
     );
 
     // Send PDF buffer

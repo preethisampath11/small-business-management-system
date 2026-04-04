@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
 import { Sidebar } from "../components/Sidebar";
+import { Navbar } from "../components/Navbar";
 import { AuthContext } from "../context/AuthContext";
 
 export const Items = () => {
@@ -25,7 +26,13 @@ export const Items = () => {
   const [errors, setErrors] = useState({});
   const [deletingId, setDeletingId] = useState(null);
 
-  const categoryOptions = ["Clothing", "Food", "Beverages", "Electronics", "Other"];
+  const categoryOptions = [
+    "Clothing",
+    "Food",
+    "Beverages",
+    "Electronics",
+    "Other",
+  ];
 
   // Fetch items on mount
   useEffect(() => {
@@ -59,7 +66,7 @@ export const Items = () => {
       // When editing grouped items, use name as the identifier
       setEditingId(item.name);
       // Transform variants from {_id, variantLabel, stock} to {_id, label, stock} for form
-      const transformedVariants = (item.variants || []).map(v => ({
+      const transformedVariants = (item.variants || []).map((v) => ({
         _id: v._id,
         label: v.variantLabel || "",
         stock: v.stock,
@@ -231,7 +238,7 @@ export const Items = () => {
         : "http://localhost:5000/api/items";
 
       // Transform variants back to variantLabel format for the API
-      const transformedVariants = formData.variants.map(v => ({
+      const transformedVariants = formData.variants.map((v) => ({
         _id: v._id, // For existing variants, include _id for update tracking
         variantLabel: v.label, // Transform label back to variantLabel
         stock: v.stock,
@@ -264,7 +271,9 @@ export const Items = () => {
         throw new Error(data.message || "Failed to save item");
       }
 
-      toast.success(editingId ? "Item updated successfully" : "Item created successfully");
+      toast.success(
+        editingId ? "Item updated successfully" : "Item created successfully",
+      );
       closeModal();
       fetchItems();
     } catch (err) {
@@ -279,12 +288,15 @@ export const Items = () => {
   const handleConfirmDelete = async (itemName) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/items/group/${encodeURIComponent(itemName)}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:5000/api/items/group/${encodeURIComponent(itemName)}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       const data = await response.json();
 
@@ -301,8 +313,10 @@ export const Items = () => {
   };
 
   const getStockStatus = (stock) => {
-    if (stock > 10) return { label: "In Stock", color: "#3fcf8e", bg: "#1a3a2f" };
-    if (stock > 0) return { label: "Low Stock", color: "#e8a020", bg: "#3a3220" };
+    if (stock > 10)
+      return { label: "In Stock", color: "#3fcf8e", bg: "#1a3a2f" };
+    if (stock > 0)
+      return { label: "Low Stock", color: "#e8a020", bg: "#3a3220" };
     return { label: "Out of Stock", color: "#e05555", bg: "#3a2020" };
   };
 
@@ -321,13 +335,13 @@ export const Items = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#111]">
+    <div className="relative min-h-screen bg-[#111]">
       <Sidebar />
+      <Navbar />
 
-      <div className="flex-1 p-4 md:p-8 ml-0 md:ml-0">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-white">Items</h1>
+      <div className="ml-[232px] pt-[92px] p-4 md:p-8">
+        {/* Action Button */}
+        <div className="flex justify-end mb-8">
           <button
             onClick={() => openModal()}
             className="px-4 py-2 bg-[#378ADD] text-white rounded-lg hover:bg-blue-600 transition"
@@ -384,7 +398,9 @@ export const Items = () => {
                   <div className="p-4">
                     {/* Name and Category */}
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-bold text-white flex-1">{item.name}</h3>
+                      <h3 className="text-lg font-bold text-white flex-1">
+                        {item.name}
+                      </h3>
                     </div>
 
                     {item.category && (
@@ -397,7 +413,9 @@ export const Items = () => {
 
                     {/* Price */}
                     <div className="mb-3">
-                      <p className="text-2xl font-bold text-[#378ADD]">₹{item.price}</p>
+                      <p className="text-2xl font-bold text-[#378ADD]">
+                        ₹{item.price}
+                      </p>
                       {item.unit && (
                         <p className="text-sm text-gray-400">{item.unit}</p>
                       )}
@@ -407,7 +425,10 @@ export const Items = () => {
                     <div className="mb-3">
                       <div
                         className="text-sm font-semibold px-3 py-1 rounded inline-block"
-                        style={{ color: totalStockStatus.color, backgroundColor: totalStockStatus.bg }}
+                        style={{
+                          color: totalStockStatus.color,
+                          backgroundColor: totalStockStatus.bg,
+                        }}
                       >
                         {totalStockStatus.label} ({item.totalStock})
                       </div>
@@ -417,7 +438,8 @@ export const Items = () => {
                     {hasVariants && item.variants.length > 0 && (
                       <div className="mb-4">
                         <p className="text-xs text-gray-400 mb-2">
-                          {item.variants.length} variant{item.variants.length !== 1 ? "s" : ""}
+                          {item.variants.length} variant
+                          {item.variants.length !== 1 ? "s" : ""}
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {item.variants.map((variant) => {
@@ -426,10 +448,14 @@ export const Items = () => {
                               <span
                                 key={variant._id}
                                 className="text-xs font-semibold px-2 py-1 rounded"
-                                style={{ color: variantStatus.color, backgroundColor: variantStatus.bg }}
+                                style={{
+                                  color: variantStatus.color,
+                                  backgroundColor: variantStatus.bg,
+                                }}
                                 title={variant.variantLabel}
                               >
-                                {variant.variantLabel || 'Default'}: {variant.stock}
+                                {variant.variantLabel || "Default"}:{" "}
+                                {variant.stock}
                               </span>
                             );
                           })}
@@ -546,7 +572,9 @@ export const Items = () => {
                     className="w-full px-4 py-2 bg-[#111] border border-[#222] rounded text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD]"
                   />
                   {errors.price && (
-                    <p className="text-sm text-[#e05555] mt-1">{errors.price}</p>
+                    <p className="text-sm text-[#e05555] mt-1">
+                      {errors.price}
+                    </p>
                   )}
                 </div>
 
@@ -678,7 +706,9 @@ export const Items = () => {
                     onChange={handleFormChange}
                     className="w-4 h-4 rounded border-[#222] text-[#378ADD] focus:ring-0"
                   />
-                  <label className="text-sm text-gray-300">Active (Show in list)</label>
+                  <label className="text-sm text-gray-300">
+                    Active (Show in list)
+                  </label>
                 </div>
 
                 {/* Buttons */}
@@ -706,9 +736,12 @@ export const Items = () => {
         {deletingId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-[#161616] border border-[#222] rounded-lg p-6 max-w-sm w-full mx-4">
-              <h3 className="text-xl font-bold text-white mb-3">Delete Item?</h3>
+              <h3 className="text-xl font-bold text-white mb-3">
+                Delete Item?
+              </h3>
               <p className="text-gray-400 mb-6">
-                This action cannot be undone. The item will be hidden from your list.
+                This action cannot be undone. The item will be hidden from your
+                list.
               </p>
               <div className="flex gap-3">
                 <button
