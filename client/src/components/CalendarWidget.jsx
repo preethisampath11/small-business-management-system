@@ -3,7 +3,7 @@ import API from "../api";
 
 export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
   const [current, setCurrent] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate());
   const [dateRevenue, setDateRevenue] = useState(0);
 
   // Get today in LOCAL time correctly
@@ -100,6 +100,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
           background: isSelected ? "#378ADD" 
                     : isToday ? "#1e1e1e" 
                     : "transparent",
+          border: isToday && !isSelected ? "1px solid #378ADD" : "none",
           color: isSelected ? "#fff" 
                : isToday ? "#e8e8e8" 
                : "#888",
@@ -221,27 +222,42 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
           <rect x="7" y="6" width="2" height="8" rx="1" />
           <rect x="12" y="3" width="2" height="11" rx="1" />
         </svg>
-        <span
-          style={{
-            fontSize: "16px",
-            fontWeight: "500",
-            color: "#e8e8e8",
-            flex: 1,
-          }}
-        >
-          Rs. {(selectedDay ? dateRevenue : ordersThisMonthRevenue)?.toLocaleString("en-IN") || 0}
-        </span>
-        <span
-          style={{
-            background: "#0d2b1a",
-            color: "#3fcf8e",
-            fontSize: "11px",
-            padding: "2px 6px",
-            borderRadius: "20px",
-          }}
-        >
-          ▲
-        </span>
+        {selectedDay ? (
+          <>
+            <span
+              style={{
+                fontSize: "16px",
+                fontWeight: "500",
+                color: "#e8e8e8",
+                flex: 1,
+              }}
+            >
+              Rs. {Number(dateRevenue).toLocaleString('en-IN', { maximumFractionDigits: 2 }) || 0}
+            </span>
+            <span
+              style={{
+                background: "#0d2b1a",
+                color: "#3fcf8e",
+                fontSize: "11px",
+                padding: "2px 6px",
+                borderRadius: "20px",
+              }}
+            >
+              ▲
+            </span>
+          </>
+        ) : (
+          <span
+            style={{
+              fontSize: "14px",
+              color: "#555",
+              flex: 1,
+              fontWeight: 500,
+            }}
+          >
+            Select a date to view sales
+          </span>
+        )}
       </div>
     </div>
   );

@@ -104,12 +104,12 @@ export const Dashboard = () => {
   const [error, setError] = useState("");
   const [period, setPeriod] = useState("yearly");
 
-  // Fetch dashboard stats whenever period changes
+  // Fetch main dashboard stats once on mount
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchMainStats = async () => {
       try {
         setLoading(true);
-        const response = await API.get(`/dashboard/stats?period=${period}`, {
+        const response = await API.get("/dashboard/stats", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -122,7 +122,6 @@ export const Dashboard = () => {
             totalOrders: response.data.totalOrders,
             ordersThisMonth: response.data.ordersThisMonth,
           });
-          setChartData(response.data.chartData || []);
           setRecentOrders(response.data.recentOrders || []);
           setLowStockItems(response.data.lowStockItems || []);
           setLowStockCount(response.data.lowStockCount || 0);
@@ -141,7 +140,28 @@ export const Dashboard = () => {
       }
     };
 
-    fetchStats();
+    fetchMainStats();
+  }, []);
+
+  // Fetch chart data when period changes
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        const response = await API.get(`/dashboard/stats?period=${period}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.data.success) {
+          setChartData(response.data.chartData || []);
+        }
+      } catch (err) {
+        console.error("Chart Data Fetch Error:", err);
+      }
+    };
+
+    fetchChartData();
   }, [period]);
 
   const getPaymentStatusBadgeColor = (status) => {

@@ -43,30 +43,42 @@ export const getDashboardStats = async (req, res) => {
     let chartData = [];
 
     if (period === "yearly") {
-      // Last 12 months grouped by month (using local timezone)
-      const startLocal = new Date(now.getFullYear(), now.getMonth() - 11, 1, 0, 0, 0, 0);
-      const start = startLocal;
+      // Last 6 years (2021-2026)
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const buckets = [];
 
-      const raw = await Order.aggregate([
-        {
-          $match: {
-            userId,
-            paymentStatus: "paid",
-            createdAt: { $gte: start },
-          },
-        },
-        {
-          $group: {
-            _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
-            },
-            revenue: { $sum: "$totalAmount" },
-          },
-        },
-        { $sort: { "_id.year": 1, "_id.month": 1 } },
-      ]);
+      // Build years in ascending order (oldest to newest)
+      for (let i = 5; i >= 0; i--) {
+        const year = currentYear - i;
+        buckets.push({
+          label: String(year),
+          year: year,
+          revenue: 0,
+        });
+      }
 
+      const startDate = new Date(buckets[0].year, 0, 1);
+      const orders = await Order.find({
+        userId: new mongoose.Types.ObjectId(req.user.id),
+        paymentStatus: "paid",
+        createdAt: { $gte: startDate },
+      });
+
+      orders.forEach((order) => {
+        const year = new Date(order.createdAt).getFullYear();
+        const bucket = buckets.find((b) => b.year === year);
+        if (bucket) bucket.revenue += order.totalAmount;
+      });
+
+      chartData = buckets.map((b) => ({
+        label: b.label,
+        revenue: Math.round(b.revenue * 100) / 100,
+      }));
+    } else if (period === "monthly") {
+      // All 12 months of current year (Jan-Dec)
+      const now = new Date();
+      const currentYear = now.getFullYear();
       const monthNames = [
         "Jan",
         "Feb",
@@ -81,99 +93,96 @@ export const getDashboardStats = async (req, res) => {
         "Nov",
         "Dec",
       ];
-      for (let i = 11; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const y = d.getFullYear();
-        const m = d.getMonth() + 1;
-        const found = raw.find((x) => x._id.year === y && x._id.month === m);
-        chartData.push({
-          label: monthNames[m - 1],
-          revenue: found ? Math.round(found.revenue * 100) / 100 : 0,
+      const buckets = [];
+
+      // Build all 12 months in calendar order (Jan = 0, Dec = 11)
+      for (let month = 0; month < 12; month++) {
+        buckets.push({
+          label: monthNames[month],
+          year: currentYear,
+          month: month,
+          revenue: 0,
         });
       }
-    } else if (period === "monthly") {
-      // Last 30 days grouped by day (using local timezone)
-      const startLocal = new Date(now);
-      startLocal.setDate(startLocal.getDate() - 29);
-      const start = new Date(startLocal.getFullYear(), startLocal.getMonth(), startLocal.getDate(), 0, 0, 0, 0);
 
-      const raw = await Order.aggregate([
-        {
-          $match: {
-            userId,
-            paymentStatus: "paid",
-            createdAt: { $gte: start },
-          },
-        },
-        {
-          $group: {
-            _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
-              day: { $dayOfMonth: "$createdAt" },
-            },
-            revenue: { $sum: "$totalAmount" },
-          },
-        },
-        { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
-      ]);
+      const startDate = new Date(currentYear, 0, 1, 0, 0, 0);
+      const endDate = new Date(currentYear, 11, 31, 23, 59, 59);
+      const orders = await Order.find({
+        userId: new mongoose.Types.ObjectId(req.user.id),
+        paymentStatus: "paid",
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
 
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const y = d.getFullYear();
-        const m = d.getMonth() + 1;
-        const day = d.getDate();
-        const found = raw.find(
-          (x) => x._id.year === y && x._id.month === m && x._id.day === day
+      orders.forEach((order) => {
+        const d = new Date(order.createdAt);
+        const orderYear = d.getFullYear();
+        const orderMonth = d.getMonth();
+        const bucket = buckets.find(
+          (b) => b.year === orderYear && b.month === orderMonth
         );
-        chartData.push({
-          label: `${day}/${m}`,
-          revenue: found ? Math.round(found.revenue * 100) / 100 : 0,
-        });
-      }
+        if (bucket) bucket.revenue += order.totalAmount;
+      });
+
+      chartData = buckets.map((b) => ({
+        label: b.label,
+        revenue: Math.round(b.revenue * 100) / 100,
+      }));
     } else if (period === "weekly") {
-      // Last 7 days grouped by day (using local timezone)
-      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      const startLocal = new Date(now);
-      startLocal.setDate(startLocal.getDate() - 6);
-      const start = new Date(startLocal.getFullYear(), startLocal.getMonth(), startLocal.getDate(), 0, 0, 0, 0);
-
-      const raw = await Order.aggregate([
-        {
-          $match: {
-            userId,
-            paymentStatus: "paid",
-            createdAt: { $gte: start },
-          },
-        },
-        {
-          $group: {
-            _id: {
-              year: { $year: "$createdAt" },
-              month: { $month: "$createdAt" },
-              day: { $dayOfMonth: "$createdAt" },
-            },
-            revenue: { $sum: "$totalAmount" },
-          },
-        },
-        { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
-      ]);
-
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const y = d.getFullYear();
-        const m = d.getMonth() + 1;
-        const day = d.getDate();
-        const found = raw.find(
-          (x) => x._id.year === y && x._id.month === m && x._id.day === day
-        );
-        chartData.push({
-          label: dayNames[d.getDay()],
-          revenue: found ? Math.round(found.revenue * 100) / 100 : 0,
+      // Current week: Sunday to Saturday
+      const now = new Date();
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      
+      // Find Sunday of current week
+      const currentDayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const sundayOfThisWeek = new Date(now);
+      sundayOfThisWeek.setDate(now.getDate() - currentDayOfWeek); // Go back to Sunday
+      sundayOfThisWeek.setHours(0, 0, 0, 0);
+      
+      // Build buckets for Sun, Mon, Tue, Wed, Thu, Fri, Sat of this week
+      const buckets = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(sundayOfThisWeek);
+        d.setDate(sundayOfThisWeek.getDate() + i); // Add days starting from Sunday
+        d.setHours(0, 0, 0, 0);
+        
+        buckets.push({
+          date: new Date(d),
+          label: days[i], // Sun (index 0), Mon (index 1), ..., Sat (index 6)
+          revenue: 0,
         });
       }
+
+      // Set date range for database query
+      const startDate = new Date(buckets[0].date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(buckets[6].date);
+      endDate.setHours(23, 59, 59, 999);
+      
+      const orders = await Order.find({
+        userId: new mongoose.Types.ObjectId(req.user.id),
+        paymentStatus: "paid",
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
+
+      // Match orders to buckets by exact date
+      orders.forEach((order) => {
+        const orderDate = new Date(order.createdAt);
+        orderDate.setHours(0, 0, 0, 0); // Normalize time
+        
+        const bucket = buckets.find(
+          (b) =>
+            b.date.getFullYear() === orderDate.getFullYear() &&
+            b.date.getMonth() === orderDate.getMonth() &&
+            b.date.getDate() === orderDate.getDate()
+        );
+        if (bucket) bucket.revenue += order.totalAmount;
+      });
+
+      chartData = buckets.map((b) => ({
+        label: b.label,
+        revenue: Math.round(b.revenue * 100) / 100,
+      }));
+      console.log("Weekly chart data:", JSON.stringify(chartData));
     }
 
     // Recent orders
