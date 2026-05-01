@@ -15,7 +15,7 @@ const DashboardIcon = () => (
   >
     <rect x="2" y="2" width="6" height="6" rx="1.5" />
     <rect x="10" y="2" width="6" height="6" rx="1.5" />
-    
+
     <rect x="2" y="10" width="6" height="6" rx="1.5" />
     <rect x="10" y="10" width="6" height="6" rx="1.5" />
   </svg>
@@ -111,16 +111,16 @@ export const Sidebar = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="hidden max-sm:flex fixed top-4 left-4 z-50 flex-col gap-1.5 justify-center items-center w-10 h-10 bg-[#161616] rounded-lg border border-[#222] hover:border-[#378ADD] transition"
+        className="hidden max-sm:flex fixed top-4 left-4 z-50 flex-col gap-1.5 justify-center items-center w-10 h-10 bg-[#ffffff] rounded-lg border border-[#e0e0e0] hover:border-[#378ADD] transition"
       >
         <span
-          className={`w-6 h-0.5 bg-white transition-transform ${isOpen ? "rotate-45 translate-y-2" : ""}`}
+          className={`w-6 h-0.5 bg-[#1a1a1a] transition-transform ${isOpen ? "rotate-45 translate-y-2" : ""}`}
         ></span>
         <span
-          className={`w-6 h-0.5 bg-white transition-opacity ${isOpen ? "opacity-0" : ""}`}
+          className={`w-6 h-0.5 bg-[#1a1a1a] transition-opacity ${isOpen ? "opacity-0" : ""}`}
         ></span>
         <span
-          className={`w-6 h-0.5 bg-white transition-transform ${isOpen ? "-rotate-45 -translate-y-2" : ""}`}
+          className={`w-6 h-0.5 bg-[#1a1a1a] transition-transform ${isOpen ? "-rotate-45 -translate-y-2" : ""}`}
         ></span>
       </button>
 
@@ -134,7 +134,7 @@ export const Sidebar = () => {
 
       {/* Sidebar - Floating Card Style */}
       <div
-        className={`hidden md:flex fixed flex-col z-[100] bg-[#161616] border border-[#222] ${
+        className={`hidden md:flex fixed flex-col z-[100] bg-[#ffffff] border border-[#e0e0e0] ${
           isOpen ? "flex" : "hidden"
         }`}
         style={{
@@ -146,6 +146,7 @@ export const Sidebar = () => {
           padding: "20px 12px",
           fontFamily: "'Inter', system-ui, sans-serif",
           overflowY: "auto",
+          boxShadow: "0 6px 18px rgba(0, 0, 0, 0.05)",
         }}
       >
         {/* Logo Area */}
@@ -156,7 +157,7 @@ export const Sidebar = () => {
             gap: "10px",
             marginBottom: "24px",
             paddingBottom: "16px",
-            borderBottom: "1px solid #222",
+            borderBottom: "1px solid #e0e0e0",
           }}
         >
           <LogoMark />
@@ -164,7 +165,7 @@ export const Sidebar = () => {
             style={{
               fontSize: "15px",
               fontWeight: 600,
-              color: "#ffffff",
+              color: "#1a1a1a",
               margin: 0,
               whiteSpace: "nowrap",
             }}
@@ -190,8 +191,8 @@ export const Sidebar = () => {
                   padding: "9px 12px",
                   borderRadius: active ? "0 10px 10px 0" : "10px",
                   borderLeft: active ? "2px solid #378ADD" : "none",
-                  backgroundColor: active ? "#222" : "transparent",
-                  color: active ? "#ffffff" : "#666",
+                  backgroundColor: active ? "#f0f0f0" : "transparent",
+                  color: active ? "#1a1a1a" : "#808080",
                   fontSize: "13px",
                   fontWeight: 400,
                   fontFamily: "'Inter', system-ui, sans-serif",
@@ -202,13 +203,13 @@ export const Sidebar = () => {
                 }}
                 onMouseEnter={(e) => {
                   if (!active) {
-                    e.currentTarget.style.color = "#ccc";
-                    e.currentTarget.style.backgroundColor = "#1e1e1e";
+                    e.currentTarget.style.color = "#1a1a1a";
+                    e.currentTarget.style.backgroundColor = "#eeeeee";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!active) {
-                    e.currentTarget.style.color = "#666";
+                    e.currentTarget.style.color = "#808080";
                     e.currentTarget.style.backgroundColor = "transparent";
                   }
                 }}
@@ -223,7 +224,7 @@ export const Sidebar = () => {
         {/* Logout Section */}
         <div
           style={{
-            borderTop: "1px solid #222",
+            borderTop: "1px solid #e0e0e0",
             paddingTop: "12px",
             marginTop: "auto",
           }}
@@ -242,7 +243,7 @@ export const Sidebar = () => {
               borderRadius: "10px",
               border: "none",
               backgroundColor: "transparent",
-              color: "#666",
+              color: "#808080",
               fontSize: "13px",
               fontWeight: 400,
               fontFamily: "'Inter', system-ui, sans-serif",
@@ -253,7 +254,7 @@ export const Sidebar = () => {
               e.currentTarget.style.color = "#e05555";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = "#666";
+              e.currentTarget.style.color = "#808080";
             }}
           >
             <LogoutIcon />

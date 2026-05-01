@@ -29,14 +29,15 @@ export const getDashboardStats = async (req, res) => {
     const totalOrders = await Order.countDocuments({ userId });
 
     // This month
-    const startOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1,
-    );
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
     const ordersThisMonth = await Order.countDocuments({
-      userId,
-      createdAt: { $gte: startOfMonth },
+      userId: new mongoose.Types.ObjectId(req.user.id),
+      createdAt: {
+        $gte: startOfMonth,
+        $lt: endOfMonth,
+      },
     });
 
     // Build chart data based on period
@@ -118,7 +119,7 @@ export const getDashboardStats = async (req, res) => {
         const orderYear = d.getFullYear();
         const orderMonth = d.getMonth();
         const bucket = buckets.find(
-          (b) => b.year === orderYear && b.month === orderMonth
+          (b) => b.year === orderYear && b.month === orderMonth,
         );
         if (bucket) bucket.revenue += order.totalAmount;
       });
@@ -131,20 +132,20 @@ export const getDashboardStats = async (req, res) => {
       // Current week: Sunday to Saturday
       const now = new Date();
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      
+
       // Find Sunday of current week
       const currentDayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
       const sundayOfThisWeek = new Date(now);
       sundayOfThisWeek.setDate(now.getDate() - currentDayOfWeek); // Go back to Sunday
       sundayOfThisWeek.setHours(0, 0, 0, 0);
-      
+
       // Build buckets for Sun, Mon, Tue, Wed, Thu, Fri, Sat of this week
       const buckets = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date(sundayOfThisWeek);
         d.setDate(sundayOfThisWeek.getDate() + i); // Add days starting from Sunday
         d.setHours(0, 0, 0, 0);
-        
+
         buckets.push({
           date: new Date(d),
           label: days[i], // Sun (index 0), Mon (index 1), ..., Sat (index 6)
@@ -157,7 +158,7 @@ export const getDashboardStats = async (req, res) => {
       startDate.setHours(0, 0, 0, 0);
       const endDate = new Date(buckets[6].date);
       endDate.setHours(23, 59, 59, 999);
-      
+
       const orders = await Order.find({
         userId: new mongoose.Types.ObjectId(req.user.id),
         paymentStatus: "paid",
@@ -168,12 +169,12 @@ export const getDashboardStats = async (req, res) => {
       orders.forEach((order) => {
         const orderDate = new Date(order.createdAt);
         orderDate.setHours(0, 0, 0, 0); // Normalize time
-        
+
         const bucket = buckets.find(
           (b) =>
             b.date.getFullYear() === orderDate.getFullYear() &&
             b.date.getMonth() === orderDate.getMonth() &&
-            b.date.getDate() === orderDate.getDate()
+            b.date.getDate() === orderDate.getDate(),
         );
         if (bucket) bucket.revenue += order.totalAmount;
       });

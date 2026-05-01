@@ -284,27 +284,26 @@ export const Customers = () => {
     const totals = calculateCustomerTotals(customerOrders);
 
     return (
-      <div className="grid grid-cols-[auto_1fr] h-screen bg-[#111]">
+      <>
         <Sidebar />
+        <Navbar />
 
-        <div className="overflow-auto">
+        <div className="ml-[232px] pt-[92px] overflow-auto min-h-screen bg-[#f8f9fa]">
           {/* Header */}
-          <div className="bg-[#161616] border-b border-[#222] px-4 sm:px-6 md:px-8 py-4 sm:py-5">
-            <div className="grid grid-cols-[1fr_auto] items-start gap-3 sm:gap-4">
-              <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white truncate">
-                  {selectedCustomer.name}
-                </h1>
-                <p className="text-gray-400 text-xs sm:text-sm mt-1">
-                  Customer Details & Order History
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedCustomer(null)}
-                className="bg-[#222] text-gray-300 px-3 sm:px-4 py-2 rounded-lg hover:bg-[#333] transition font-semibold text-xs sm:text-sm whitespace-nowrap"
-              >
-                ← Back
-              </button>
+          <div className="bg-[#ffffff] border-b border-[#e0e0e0] px-4 sm:px-6 md:px-8 py-4 sm:py-5 sticky top-0 z-10">
+            <button
+              onClick={() => setSelectedCustomer(null)}
+              className="text-[#378ADD] hover:text-blue-400 text-xs sm:text-sm font-semibold transition whitespace-nowrap mb-3"
+            >
+              ← Back to Customers
+            </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1a1a1a]">
+                {selectedCustomer.name}
+              </h1>
+              <p className="text-[#999999] text-xs sm:text-sm mt-1">
+                Customer Details & Order History
+              </p>
             </div>
           </div>
 
@@ -313,27 +312,27 @@ export const Customers = () => {
             {/* Customer Info */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
               {/* Contact Info */}
-              <div className="bg-[#161616] rounded-lg p-6 border border-[#222]">
-                <h2 className="text-lg font-semibold text-white mb-4">
+              <div className="bg-[#ffffff] rounded-lg p-6 border border-[#e0e0e0]">
+                <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
                   Contact Information
                 </h2>
                 <div className="grid gap-4">
                   <div className="grid">
-                    <span className="text-gray-400 text-sm">Email</span>
-                    <span className="text-white font-medium mt-1">
+                    <span className="text-[#999999] text-sm">Email</span>
+                    <span className="text-[#1a1a1a] font-medium mt-1">
                       {selectedCustomer.email}
                     </span>
                   </div>
                   <div className="grid">
-                    <span className="text-gray-400 text-sm">Phone</span>
-                    <span className="text-white font-medium mt-1">
+                    <span className="text-[#999999] text-sm">Phone</span>
+                    <span className="text-[#1a1a1a] font-medium mt-1">
                       {selectedCustomer.phone}
                     </span>
                   </div>
                   {selectedCustomer.address && (
                     <div className="grid">
-                      <span className="text-gray-400 text-sm">Address</span>
-                      <span className="text-white font-medium mt-1">
+                      <span className="text-[#999999] text-sm">Address</span>
+                      <span className="text-[#1a1a1a] font-medium mt-1">
                         {selectedCustomer.address}
                       </span>
                     </div>
@@ -343,17 +342,17 @@ export const Customers = () => {
 
               {/* Stats */}
               <div className="grid grid-cols-1 gap-4">
-                <div className="bg-[#161616] rounded-lg p-6 border border-[#222]">
-                  <div className="text-gray-400 text-sm mb-2">
+                <div className="bg-[#ffffff] rounded-lg p-6 border border-[#e0e0e0]">
+                  <div className="text-[#999999] text-sm mb-2">
                     Total Amount Spent
                   </div>
                   <div className="text-3xl font-bold text-[#378ADD]">
                     ₹{totals.totalSpent.toLocaleString()}
                   </div>
                 </div>
-                <div className="bg-[#161616] rounded-lg p-6 border border-[#222]">
-                  <div className="text-gray-400 text-sm mb-2">Total Orders</div>
-                  <div className="text-3xl font-bold text-white">
+                <div className="bg-[#ffffff] rounded-lg p-6 border border-[#e0e0e0]">
+                  <div className="text-[#999999] text-sm mb-2">Total Orders</div>
+                  <div className="text-3xl font-bold text-[#1a1a1a]">
                     {totals.numberOfOrders}
                   </div>
                 </div>
@@ -361,14 +360,14 @@ export const Customers = () => {
 
               {/* More Stats */}
               <div className="grid grid-cols-1 gap-4">
-                <div className="bg-[#161616] rounded-lg p-6 border border-[#222]">
-                  <div className="text-gray-400 text-sm mb-2">Pending Dues</div>
-                  <div className="text-3xl font-bold text-[#e05555]">
+                <div className="bg-[#ffffff] rounded-lg p-6 border border-[#e0e0e0]">
+                  <div className="text-[#999999] text-sm mb-2">Pending Dues</div>
+                  <div className="text-3xl font-bold text-[#c62828]">
                     ₹{totals.unpaidAmount.toLocaleString()}
                   </div>
                 </div>
-                <div className="bg-[#161616] rounded-lg p-6 border border-[#222]">
-                  <div className="text-gray-400 text-sm mb-2">
+                <div className="bg-[#ffffff] rounded-lg p-6 border border-[#e0e0e0]">
+                  <div className="text-[#999999] text-sm mb-2">
                     Pending Orders
                   </div>
                   <div className="text-3xl font-bold text-[#e8a020]">
@@ -393,43 +392,43 @@ export const Customers = () => {
                     setSelectedCustomer(null);
                   }
                 }}
-                className="bg-[#2b0a0a] text-[#e05555] px-4 py-2 rounded-lg hover:bg-red-700 transition font-semibold border border-[#e05555]"
+                className="bg-[#ffebee] text-[#c62828] px-4 py-2 rounded-lg hover:bg-[#ffcdd2] transition font-semibold border border-[#ef5350]"
               >
                 🗑 Delete
               </button>
             </div>
 
             {/* Order History */}
-            <div className="bg-[#161616] rounded-lg p-6 border border-[#222]">
-              <h2 className="text-xl font-semibold text-white mb-4">
+            <div className="bg-[#ffffff] rounded-lg p-6 border border-[#e0e0e0]">
+              <h2 className="text-xl font-semibold text-[#1a1a1a] mb-4">
                 Order History
               </h2>
 
               {customerOrders.length === 0 ? (
-                <div className="text-center text-gray-400 py-8">
+                <div className="text-center text-[#999999] py-8">
                   No orders found for this customer
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="border-b border-[#222]">
+                    <thead className="border-b border-[#e0e0e0]">
                       <tr>
-                        <th className="text-left text-gray-400 font-semibold px-4 py-2">
+                        <th className="text-left text-[#1a1a1a] font-semibold px-4 py-2">
                           Date
                         </th>
-                        <th className="text-left text-gray-400 font-semibold px-4 py-2">
+                        <th className="text-left text-[#1a1a1a] font-semibold px-4 py-2">
                           Amount
                         </th>
-                        <th className="text-left text-gray-400 font-semibold px-4 py-2">
+                        <th className="text-left text-[#1a1a1a] font-semibold px-4 py-2">
                           Items
                         </th>
-                        <th className="text-left text-gray-400 font-semibold px-4 py-2">
+                        <th className="text-left text-[#1a1a1a] font-semibold px-4 py-2">
                           Order Status
                         </th>
-                        <th className="text-left text-gray-400 font-semibold px-4 py-2">
+                        <th className="text-left text-[#1a1a1a] font-semibold px-4 py-2">
                           Payment Status
                         </th>
-                        <th className="text-left text-gray-400 font-semibold px-4 py-2">
+                        <th className="text-left text-[#1a1a1a] font-semibold px-4 py-2">
                           Download
                         </th>
                       </tr>
@@ -438,15 +437,15 @@ export const Customers = () => {
                       {customerOrders.map((order) => (
                         <tr
                           key={order._id}
-                          className="border-b border-[#222] hover:bg-[#1a1a1a] transition"
+                          className="border-b border-[#e0e0e0] hover:bg-[#f5f5f5] transition"
                         >
-                          <td className="px-4 py-3 text-gray-300">
+                          <td className="px-4 py-3 text-[#1a1a1a]">
                             {new Date(order.createdAt).toLocaleDateString()}
                           </td>
-                          <td className="px-4 py-3 text-white font-semibold">
+                          <td className="px-4 py-3 text-[#1a1a1a] font-semibold">
                             ₹{order.totalAmount?.toLocaleString()}
                           </td>
-                          <td className="px-4 py-3 text-gray-300">
+                          <td className="px-4 py-3 text-[#1a1a1a]">
                             {order.items?.length || 0} item
                             {order.items?.length !== 1 ? "s" : ""}
                           </td>
@@ -454,8 +453,8 @@ export const Customers = () => {
                             <span
                               className={`px-3 py-1 rounded text-xs font-semibold ${
                                 order.orderStatus === "delivered"
-                                  ? "bg-[#0d2b1a] text-[#3fcf8e]"
-                                  : "bg-[#2b1a00] text-[#e8a020]"
+                                  ? "bg-[#e8f5e9] text-[#1b5e20]"
+                                  : "bg-[#fff3e0] text-[#e65100]"
                               }`}
                             >
                               {order.orderStatus?.charAt(0).toUpperCase() +
@@ -466,10 +465,10 @@ export const Customers = () => {
                             <span
                               className={`px-3 py-1 rounded text-xs font-semibold ${
                                 order.paymentStatus === "paid"
-                                  ? "bg-[#0d2b1a] text-[#3fcf8e]"
+                                  ? "bg-[#e8f5e9] text-[#1b5e20]"
                                   : order.paymentStatus === "unpaid"
-                                    ? "bg-[#2b0a0a] text-[#e05555]"
-                                    : "bg-[#2b1a00] text-[#e8a020]"
+                                    ? "bg-[#ffebee] text-[#c62828]"
+                                    : "bg-[#fff3e0] text-[#e65100]"
                               }`}
                             >
                               {order.paymentStatus?.charAt(0).toUpperCase() +
@@ -480,7 +479,7 @@ export const Customers = () => {
                             <button
                               onClick={() => handleDownloadInvoice(order._id)}
                               disabled={downloadingInvoiceId === order._id}
-                              className="text-green-400 hover:text-green-300 text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                              className="text-[#1b5e20] hover:text-[#1b5e20] text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
                             >
                               {downloadingInvoiceId === order._id ? (
                                 <>
@@ -500,25 +499,24 @@ export const Customers = () => {
               )}
             </div>
           </div>
-        </div>
 
-        {/* Modal */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-[#161616] rounded-lg border border-[#222] p-6 w-full max-w-md">
-              <h2 className="text-2xl font-bold text-white mb-4">
+          {/* Modal */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-[#ffffff] rounded-lg border border-[#e0e0e0] p-6 w-full max-w-md">
+              <h2 className="text-2xl font-bold text-[#1a1a1a] mb-4">
                 {editingId ? "Edit Customer" : "Add New Customer"}
               </h2>
 
               {error && (
-                <div className="bg-[#2b0a0a] text-[#e05555] p-3 rounded-lg mb-4 border border-[#e05555] text-sm">
+                <div className="bg-[#ffebee] text-[#c62828] p-3 rounded-lg mb-4 border border-[#ef5350] text-sm">
                   {error}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="grid gap-4">
                 <div className="grid">
-                  <label className="text-gray-300 font-semibold mb-2">
+                  <label className="text-[#1a1a1a] font-semibold mb-2">
                     Name *
                   </label>
                   <input
@@ -527,13 +525,13 @@ export const Customers = () => {
                     value={formData.name}
                     onChange={handleFormChange}
                     placeholder="Customer name"
-                    className="bg-[#111] border border-[#222] rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] transition"
+                    className="bg-[#ffffff] border border-[#e0e0e0] rounded-lg px-4 py-2 text-[#1a1a1a] placeholder-[#cccccc] focus:outline-none focus:border-[#378ADD] transition"
                     required
                   />
                 </div>
 
                 <div className="grid">
-                  <label className="text-gray-300 font-semibold mb-2">
+                  <label className="text-[#1a1a1a] font-semibold mb-2">
                     Email *
                   </label>
                   <input
@@ -542,13 +540,13 @@ export const Customers = () => {
                     value={formData.email}
                     onChange={handleFormChange}
                     placeholder="email@example.com"
-                    className="bg-[#111] border border-[#222] rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] transition"
+                    className="bg-[#ffffff] border border-[#e0e0e0] rounded-lg px-4 py-2 text-[#1a1a1a] placeholder-[#cccccc] focus:outline-none focus:border-[#378ADD] transition"
                     required
                   />
                 </div>
 
                 <div className="grid">
-                  <label className="text-gray-300 font-semibold mb-2">
+                  <label className="text-[#1a1a1a] font-semibold mb-2">
                     Phone *
                   </label>
                   <input
@@ -557,13 +555,13 @@ export const Customers = () => {
                     value={formData.phone}
                     onChange={handleFormChange}
                     placeholder="+1 (555) 000-0000"
-                    className="bg-[#111] border border-[#222] rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] transition"
+                    className="bg-[#ffffff] border border-[#e0e0e0] rounded-lg px-4 py-2 text-[#1a1a1a] placeholder-[#cccccc] focus:outline-none focus:border-[#378ADD] transition"
                     required
                   />
                 </div>
 
                 <div className="grid">
-                  <label className="text-gray-300 font-semibold mb-2">
+                  <label className="text-[#1a1a1a] font-semibold mb-2">
                     Address (Optional)
                   </label>
                   <input
@@ -572,7 +570,7 @@ export const Customers = () => {
                     value={formData.address}
                     onChange={handleFormChange}
                     placeholder="Street address"
-                    className="bg-[#111] border border-[#222] rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] transition"
+                    className="bg-[#ffffff] border border-[#e0e0e0] rounded-lg px-4 py-2 text-[#1a1a1a] placeholder-[#cccccc] focus:outline-none focus:border-[#378ADD] transition"
                   />
                 </div>
 
@@ -586,7 +584,7 @@ export const Customers = () => {
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="bg-[#222] text-gray-300 px-4 py-2 rounded-lg hover:bg-[#333] transition font-semibold"
+                    className="bg-[#f5f5f5] text-[#1a1a1a] px-4 py-2 rounded-lg hover:bg-[#e8e8e8] transition font-semibold"
                   >
                     Cancel
                   </button>
@@ -594,13 +592,14 @@ export const Customers = () => {
               </form>
             </div>
           </div>
-        )}
-      </div>
+          )}
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-[#111]">
+    <div className="relative min-h-screen bg-[#f8f9fa]">
       <Sidebar />
       <Navbar />
 
@@ -616,40 +615,40 @@ export const Customers = () => {
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 md:p-8\">
+        <div className="p-4 sm:p-6 md:p-8">
           {error && (
-            <div className="bg-[#2b0a0a] text-[#e05555] p-4 rounded-lg mb-6 border border-[#e05555]">
+            <div className="bg-[#ffebee] text-[#c62828] p-4 rounded-lg mb-6 border border-[#ef5350]">
               {error}
             </div>
           )}
 
           {loading ? (
-            <div className="text-center text-gray-400 py-12">
+            <div className="text-center text-[#999999] py-12">
               Loading customers...
             </div>
           ) : customers.length === 0 ? (
-            <div className="text-center text-gray-400 py-12 bg-[#161616] rounded-lg border border-[#222]">
+            <div className="text-center text-[#999999] py-12 bg-[#ffffff] rounded-lg border border-[#e0e0e0]">
               No customers found. Click "Add Customer" to create one.
             </div>
           ) : (
-            <div className="bg-[#161616] rounded-lg border border-[#222] overflow-hidden">
+            <div className="bg-[#ffffff] rounded-lg border border-[#e0e0e0] overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-[#1a1a1a] border-b border-[#222]">
+                  <thead className="bg-[#f5f5f5] border-b border-[#e0e0e0]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-gray-400 font-semibold text-sm">
+                      <th className="px-6 py-3 text-left text-[#1a1a1a] font-semibold text-sm">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-gray-400 font-semibold text-sm">
+                      <th className="px-6 py-3 text-left text-[#1a1a1a] font-semibold text-sm">
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-gray-400 font-semibold text-sm">
+                      <th className="px-6 py-3 text-left text-[#1a1a1a] font-semibold text-sm">
                         Phone
                       </th>
-                      <th className="px-6 py-3 text-left text-gray-400 font-semibold text-sm">
+                      <th className="px-6 py-3 text-left text-[#1a1a1a] font-semibold text-sm">
                         Total Orders
                       </th>
-                      <th className="px-6 py-3 text-left text-gray-400 font-semibold text-sm">
+                      <th className="px-6 py-3 text-left text-[#1a1a1a] font-semibold text-sm">
                         Actions
                       </th>
                     </tr>
@@ -663,21 +662,21 @@ export const Customers = () => {
                       return (
                         <tr
                           key={customer._id}
-                          className="border-t border-[#222] hover:bg-[#1a1a1a] transition"
+                          className="border-t border-[#e0e0e0] hover:bg-[#f5f5f5] transition"
                         >
                           <td className="px-6 py-4">
-                            <span className="text-white font-semibold">
+                            <span className="text-[#1a1a1a] font-semibold">
                               {customer.name}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-gray-300">
+                          <td className="px-6 py-4 text-[#1a1a1a]">
                             {customer.email}
                           </td>
-                          <td className="px-6 py-4 text-gray-300">
+                          <td className="px-6 py-4 text-[#1a1a1a]">
                             {customer.phone}
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-white font-semibold">
+                            <span className="text-[#1a1a1a] font-semibold">
                               {customerOrderCount}
                             </span>
                           </td>
@@ -685,19 +684,19 @@ export const Customers = () => {
                             <div className="grid grid-cols-3 gap-2">
                               <button
                                 onClick={() => openDetailView(customer)}
-                                className="text-[#378ADD] hover:text-blue-400 font-semibold transition text-sm"
+                                className="text-[#378ADD] hover:text-blue-600 font-semibold transition text-sm"
                               >
                                 View
                               </button>
                               <button
                                 onClick={() => openModal(customer)}
-                                className="text-green-400 hover:text-green-300 font-semibold transition text-sm"
+                                className="text-[#1b5e20] hover:text-[#155724] font-semibold transition text-sm"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => handleDelete(customer._id)}
-                                className="text-red-400 hover:text-red-300 font-semibold transition text-sm"
+                                className="text-[#c62828] hover:text-[#b71c1c] font-semibold transition text-sm"
                               >
                                 Delete
                               </button>
@@ -714,7 +713,7 @@ export const Customers = () => {
 
           {/* Customer Count */}
           {customers.length > 0 && (
-            <div className="mt-4 text-gray-400 text-sm">
+            <div className="mt-4 text-[#999999] text-sm">
               Total: {customers.length} customer
               {customers.length !== 1 ? "s" : ""}
             </div>
@@ -724,20 +723,20 @@ export const Customers = () => {
         {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-[#161616] rounded-lg border border-[#222] p-6 w-full max-w-md">
-              <h2 className="text-2xl font-bold text-white mb-4">
+            <div className="bg-[#ffffff] rounded-lg border border-[#e0e0e0] p-6 w-full max-w-md">
+              <h2 className="text-2xl font-bold text-[#1a1a1a] mb-4">
                 {editingId ? "Edit Customer" : "Add New Customer"}
               </h2>
 
               {error && (
-                <div className="bg-[#2b0a0a] text-[#e05555] p-3 rounded-lg mb-4 border border-[#e05555] text-sm">
+                <div className="bg-[#ffebee] text-[#c62828] p-3 rounded-lg mb-4 border border-[#ef5350] text-sm">
                   {error}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="grid gap-4">
                 <div className="grid">
-                  <label className="text-gray-300 font-semibold mb-2">
+                  <label className="text-[#1a1a1a] font-semibold mb-2">
                     Name *
                   </label>
                   <input
@@ -746,13 +745,13 @@ export const Customers = () => {
                     value={formData.name}
                     onChange={handleFormChange}
                     placeholder="Customer name"
-                    className="bg-[#111] border border-[#222] rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] transition"
+                    className="bg-[#ffffff] border border-[#e0e0e0] rounded-lg px-4 py-2 text-[#1a1a1a] placeholder-[#cccccc] focus:outline-none focus:border-[#378ADD] transition"
                     required
                   />
                 </div>
 
                 <div className="grid">
-                  <label className="text-gray-300 font-semibold mb-2">
+                  <label className="text-[#1a1a1a] font-semibold mb-2">
                     Email *
                   </label>
                   <input
@@ -761,13 +760,13 @@ export const Customers = () => {
                     value={formData.email}
                     onChange={handleFormChange}
                     placeholder="email@example.com"
-                    className="bg-[#111] border border-[#222] rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] transition"
+                    className="bg-[#ffffff] border border-[#e0e0e0] rounded-lg px-4 py-2 text-[#1a1a1a] placeholder-[#cccccc] focus:outline-none focus:border-[#378ADD] transition"
                     required
                   />
                 </div>
 
                 <div className="grid">
-                  <label className="text-gray-300 font-semibold mb-2">
+                  <label className="text-[#1a1a1a] font-semibold mb-2">
                     Phone *
                   </label>
                   <input
@@ -776,13 +775,13 @@ export const Customers = () => {
                     value={formData.phone}
                     onChange={handleFormChange}
                     placeholder="+1 (555) 000-0000"
-                    className="bg-[#111] border border-[#222] rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] transition"
+                    className="bg-[#ffffff] border border-[#e0e0e0] rounded-lg px-4 py-2 text-[#1a1a1a] placeholder-[#cccccc] focus:outline-none focus:border-[#378ADD] transition"
                     required
                   />
                 </div>
 
                 <div className="grid">
-                  <label className="text-gray-300 font-semibold mb-2">
+                  <label className="text-[#1a1a1a] font-semibold mb-2">
                     Address (Optional)
                   </label>
                   <input
@@ -791,7 +790,7 @@ export const Customers = () => {
                     value={formData.address}
                     onChange={handleFormChange}
                     placeholder="Street address"
-                    className="bg-[#111] border border-[#222] rounded-lg px-4 py-2 text-white placeholder-gray-600 focus:outline-none focus:border-[#378ADD] transition"
+                    className="bg-[#ffffff] border border-[#e0e0e0] rounded-lg px-4 py-2 text-[#1a1a1a] placeholder-[#cccccc] focus:outline-none focus:border-[#378ADD] transition"
                   />
                 </div>
 
@@ -805,7 +804,7 @@ export const Customers = () => {
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="bg-[#222] text-gray-300 px-4 py-2 rounded-lg hover:bg-[#333] transition font-semibold"
+                    className="bg-[#f5f5f5] text-[#1a1a1a] px-4 py-2 rounded-lg hover:bg-[#e8e8e8] transition font-semibold"
                   >
                     Cancel
                   </button>

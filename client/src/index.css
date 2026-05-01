@@ -4,27 +4,66 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
+/* Reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 html,
-body {
-  overflow: auto;
-  height: auto;
+body,
+#root {
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  background: #f8f9fa;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #1a1a1a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Card strip scrollbar styling */
+/* Main content area — works for ALL pages */
+.main-content {
+  margin-left: 232px;
+  padding-top: 120px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 60px;
+  min-height: 100vh;
+  overflow: visible;
+}
+
+/* Global scrollbar style */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b0;
+}
+
+/* Card strip horizontal scroll */
+.card-strip {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
+}
 .card-strip::-webkit-scrollbar {
   height: 4px;
 }
@@ -32,11 +71,466 @@ body {
   background: transparent;
 }
 .card-strip::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: #d0d0d0;
   border-radius: 2px;
+}
+
+/* Stat card — reusable */
+.stat-card {
+  flex-shrink: 0;
+  width: 220px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+/* Section card — reusable */
+.section-card {
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+/* Table styles — reusable across Orders, Customers */
+.inv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.inv-table th {
+  text-align: left;
+  padding: 12px;
+  color: #999999;
+  font-weight: 400;
+  font-size: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.inv-table td {
+  padding: 14px 12px;
+  color: #666666;
+  border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
+}
+.inv-table tr:hover td {
+  background: #f5f5f5;
+}
+.inv-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status pill — reusable */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.pill-paid {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #1b5e2033;
+}
+.pill-unpaid {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #c6282833;
+}
+.pill-partial {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #e6510033;
+}
+.pill-pending {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1px solid #e6510033;
+}
+.pill-delivered {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #1b5e2033;
+}
+.pill-processing {
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #1565c033;
+}
+
+/* Filter buttons — reusable */
+.filter-btn {
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: "Inter", system-ui;
+  cursor: pointer;
+  border: 1px solid #e0e0e0;
+  background: #f5f5f5;
+  color: #666666;
+  transition: all 0.15s;
+}
+.filter-btn:hover {
+  background: #eeeeee;
+  color: #333333;
+}
+.filter-btn.active {
+  background: #378add;
+  color: #fff;
+  border-color: #378add;
+}
+
+/* Search input — reusable */
+.search-input {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: "Inter", system-ui;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.search-input:focus {
+  border-color: #378add;
+}
+.search-input::placeholder {
+  color: #aaaaaa;
+}
+
+/* Section title */
+.section-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+/* Pagination button */
+.page-btn {
+  background: #f5f5f5;
+  color: #666666;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: "Inter", system-ui;
+  cursor: pointer;
+  min-width: 32px;
+  transition: all 0.15s;
+}
+.page-btn:hover:not(:disabled) {
+  background: #eeeeee;
+  color: #1a1a1a;
+}
+.page-btn.active {
+  background: #378add;
+  color: #fff;
+  border-color: #378add;
+}
+.page-btn:disabled {
+  color: #cccccc;
+  cursor: default;
 }
 
 /* Hide scrollbars in top selling list */
 .top-sell-scroll::-webkit-scrollbar {
   display: none;
+}
+
+/* ═══ ELEVATION SYSTEM ═══ */
+
+/* Premium card with lift on hover */
+.card-elevated {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.card-elevated:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Soft card with minimal shadow */
+.card-soft {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+/* Interactive tile with subtle scale */
+.interactive-tile {
+  transition: all 0.2s ease;
+}
+
+.interactive-tile:hover {
+  background: #f9f9f9;
+  transform: scale(1.01);
+}
+
+/* Section with hover lift */
+.section-hover {
+  transition: all 0.2s ease;
+}
+
+.section-hover:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Stat value typography */
+.stat-value {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* ═══ SPACING & HIERARCHY SYSTEM ═══ */
+
+.section-spacing {
+  margin-top: 24px;
+}
+
+/* ═══ SPACING & HIERARCHY SYSTEM ═══ */
+
+.section-spacing {
+  margin-top: 24px;
+}
+
+.card-padding {
+  padding: 18px 20px;
+}
+
+.card-title {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.card-subtext {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.highlight-card {
+  border: 1px solid #d6e4ff;
+  background: #f5f9ff;
+}
+
+/* ═══ ADVANCED TYPOGRAPHY SYSTEM ═══ */
+
+.section-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111111;
+  margin-bottom: 16px;
+  letter-spacing: 0.3px;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #999999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #999999;
+  font-weight: 400;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111111;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.metric-subtext {
+  font-size: 11px;
+  color: #999999;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+/* ═══ CARD HIERARCHY SYSTEM ═══ */
+
+/* Primary card — emphasized */
+.card-primary {
+  background: #f5f9ff;
+  border: 1.5px solid #d6e4ff;
+  box-shadow: 0 6px 20px rgba(55, 138, 221, 0.08);
+}
+
+.card-primary:hover {
+  box-shadow: 0 8px 28px rgba(55, 138, 221, 0.12);
+  transform: translateY(-3px);
+}
+
+/* Secondary card — neutral weight */
+.card-secondary {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.card-secondary:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+/* ═══ SECTION CONTAINER ═══ */
+
+.section-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 32px;
+}
+
+@media (max-width: 1200px) {
+  .section-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-box {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+.section-box:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.section-box-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111111;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ═══ FILTER & ACTION BUTTONS ═══ */
+
+.filter-button {
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  background: #f5f5f5;
+  color: #666666;
+  transition: all 0.2s ease;
+  font-family: "Inter", system-ui;
+  white-space: nowrap;
+}
+
+.filter-button:hover {
+  background: #eeeeee;
+  color: #333333;
+}
+
+.filter-button.active {
+  background: #378add;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(55, 138, 221, 0.3);
+  transform: scale(1.02);
+}
+
+/* ═══ STAT CARD SYSTEM ═══ */
+
+.stat-card-strip {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #d0d0d0 transparent;
+}
+
+.stat-card-strip::-webkit-scrollbar {
+  height: 4px;
+}
+
+.stat-card-strip::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.stat-card-strip::-webkit-scrollbar-thumb {
+  background: #d0d0d0;
+  border-radius: 2px;
+}
+
+.stat-card {
+  flex-shrink: 0;
+  width: 220px;
+  height: 220px;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card.primary {
+  background: linear-gradient(135deg, #f5f9ff 0%, #ffffff 100%);
+  border: 1.5px solid #d6e4ff;
+  box-shadow: 0 6px 24px rgba(55, 138, 221, 0.1);
+}
+
+.stat-card.primary:hover {
+  box-shadow: 0 12px 32px rgba(55, 138, 221, 0.15);
+  transform: translateY(-4px);
+}
+
+.stat-card.secondary {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.stat-card.secondary:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.stat-card-label {
+  font-size: 12px;
+  color: #999999;
+  font-weight: 500;
+}
+
+.stat-card-icon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.6;
 }

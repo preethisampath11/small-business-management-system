@@ -10,19 +10,15 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide an item name"],
   },
-  variantLabel: {
-    type: String,
-    default: "",
-  },
   description: {
     type: String,
   },
   category: {
     type: String,
   },
-  price: {
+  basePrice: {
     type: Number,
-    required: [true, "Please provide a price"],
+    required: [true, "Please provide a base price"],
     set: (v) => Math.round(v * 100) / 100,
   },
   unit: {
@@ -39,10 +35,60 @@ const itemSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  // Multi-dimensional variant support
+  variantTypes: [
+    {
+      label: {
+        type: String,
+        required: true,
+      },
+      options: [
+        {
+          type: String,
+          required: true,
+        },
+      ],
+    },
+  ],
+  // Combinations with prices and stock
+  variants: [
+    {
+      combination: {
+        type: mongoose.Schema.Types.Mixed,
+        required: true,
+      },
+      price: {
+        type: Number,
+        required: true,
+        set: (v) => Math.round(v * 100) / 100,
+      },
+      stock: {
+        type: Number,
+        default: 0,
+      },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
+
+// Helper method to generate all variant combinations using cartesian product
+itemSchema.statics.cartesianProduct = function (arrays) {
+  return arrays.reduce(
+    (acc, arr) => acc.flatMap((a) => arr.map((b) => [...a, b])),
+    [[]]
+  );
+};
+
+// Helper method to build combination object from labels and values
+itemSchema.statics.buildCombination = function (variantTypes, valueArray) {
+  const combination = {};
+  variantTypes.forEach((vt, index) => {
+    combination[vt.label] = valueArray[index];
+  });
+  return combination;
+};
 
 export default mongoose.model("Item", itemSchema);

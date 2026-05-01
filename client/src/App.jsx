@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -7,8 +12,6 @@ import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Dashboard } from "./pages/Dashboard";
 import { Orders } from "./pages/Orders";
-import { OrderDetail } from "./pages/OrderDetail";
-import { AddOrder } from "./pages/AddOrder";
 import { Items } from "./pages/Items";
 import { Customers } from "./pages/Customers";
 
@@ -34,22 +37,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <Orders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/orders/:id"
-            element={
-              <ProtectedRoute>
-                <OrderDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/orders/add"
-            element={
-              <ProtectedRoute>
-                <AddOrder />
               </ProtectedRoute>
             }
           />

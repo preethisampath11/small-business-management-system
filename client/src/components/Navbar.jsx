@@ -32,6 +32,7 @@ export const Navbar = () => {
 
   return (
     <div
+      className="card-soft"
       style={{
         position: "fixed",
         top: "16px",
@@ -39,8 +40,8 @@ export const Navbar = () => {
         right: "16px",
         height: "60px",
         borderRadius: "16px",
-        background: "#161616",
-        border: "1px solid #222",
+        background: "#ffffff",
+        border: "1px solid #e0e0e0",
         zIndex: 99,
         display: "flex",
         alignItems: "center",
@@ -54,7 +55,7 @@ export const Navbar = () => {
         style={{
           fontSize: "16px",
           fontWeight: 600,
-          color: "#e8e8e8",
+          color: "#1a1a1a",
           margin: 0,
           fontFamily: "'Inter', system-ui, sans-serif",
         }}
@@ -68,8 +69,8 @@ export const Navbar = () => {
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          background: "#1e1e1e",
-          border: "1px solid #2a2a2a",
+          background: "#f5f5f5",
+          border: "1px solid #e0e0e0",
           borderRadius: "999px",
           padding: "4px 4px 4px 14px",
           cursor: "pointer",
@@ -87,7 +88,7 @@ export const Navbar = () => {
             style={{
               fontSize: "13px",
               fontWeight: 500,
-              color: "#e8e8e8",
+              color: "#1a1a1a",
               margin: 0,
               fontFamily: "'Inter', system-ui, sans-serif",
             }}
@@ -98,7 +99,7 @@ export const Navbar = () => {
             style={{
               fontSize: "10px",
               fontWeight: 400,
-              color: "#555",
+              color: "#999999",
               margin: 0,
               fontFamily: "'Inter', system-ui, sans-serif",
             }}

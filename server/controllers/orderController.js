@@ -9,13 +9,51 @@ import { generateInvoicePDF } from "../utils/generateInvoice.js";
 // @access  Private
 export const getOrders = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, search = "", searchType = "all" } = req.query;
     const userId = new mongoose.Types.ObjectId(req.user.id);
-    
+
+    // Build filter query
+    const filter = { userId };
+
+    // Add search filter based on search type
+    if (search.trim()) {
+      const searchRegex = { $regex: search, $options: "i" };
+
+      if (searchType === "all") {
+        // Search across all fields
+        const customers = await Customer.find({
+          $or: [{ name: searchRegex }, { phone: searchRegex }],
+          userId,
+        }).select("_id");
+        const customerIds = customers.map((c) => c._id);
+
+        filter.$or = [
+          { customerId: { $in: customerIds } },
+          { invoiceNumber: searchRegex },
+        ];
+      } else if (searchType === "customerName") {
+        const customers = await Customer.find({
+          name: searchRegex,
+          userId,
+        }).select("_id");
+        const customerIds = customers.map((c) => c._id);
+        filter.customerId = { $in: customerIds };
+      } else if (searchType === "invoice") {
+        filter.invoiceNumber = searchRegex;
+      } else if (searchType === "phone") {
+        const customers = await Customer.find({
+          phone: searchRegex,
+          userId,
+        }).select("_id");
+        const customerIds = customers.map((c) => c._id);
+        filter.customerId = { $in: customerIds };
+      }
+    }
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const total = await Order.countDocuments({ userId });
-    
-    const orders = await Order.find({ userId })
+    const total = await Order.countDocuments(filter);
+
+    const orders = await Order.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
@@ -76,6 +114,129 @@ export const getOrderById = async (req, res) => {
   }
 };
 
+// Helper: Build display label from variant combination object
+const buildVariantLabel = (combination) => {
+  if (!combination || Object.keys(combination).length === 0) {
+    return "";
+  }
+  return Object.values(combination).join(" / ");
+};
+
+// Helper: Check stock availability for an item
+// Returns { sufficient: boolean, available: number }
+const checkStock = async (itemId, combination) => {
+  const item = await Item.findById(itemId);
+  if (!item) return { sufficient: false, available: 0 };
+
+  // Non-variant item (combination is empty object or null/undefined)
+  if (!combination || Object.keys(combination).length === 0) {
+    return {
+      sufficient: true, // We'll do quantity check separately
+      available: item.stock || 0,
+    };
+  }
+
+  // Variant item - find matching combination
+  const matchingVariant = item.variants?.find((v) =>
+    JSON.stringify(v.combination) === JSON.stringify(combination)
+  );
+
+  if (!matchingVariant) {
+    return { sufficient: false, available: 0 };
+  }
+
+  return {
+    sufficient: true, // We'll do quantity check separately
+    available: matchingVariant.stock || 0,
+  };
+};
+
+// Helper: Validate stock for all items in order
+// Returns { valid: boolean, warnings: string[] }
+const validateOrderStock = async (items) => {
+  const warnings = [];
+
+  for (const item of items) {
+    if (!item.itemId) continue;
+
+    const catalogItem = await Item.findById(item.itemId);
+    if (!catalogItem) continue;
+
+    const { available } = await checkStock(item.itemId, item.combination);
+
+    if (item.quantity > available) {
+      const variantLabel = buildVariantLabel(item.combination);
+      const variantText = variantLabel ? ` (${variantLabel})` : "";
+      warnings.push(
+        `${catalogItem.name}${variantText} — only ${available} in stock, ordered ${item.quantity}`,
+      );
+    }
+  }
+
+  return {
+    valid: warnings.length === 0,
+    warnings,
+  };
+};
+
+// Helper: Deduct stock for all items in order
+// Handles both non-variant and variant items
+// Returns { success: boolean, errors: string[] }
+const deductOrderStock = async (userId, items) => {
+  const errors = [];
+
+  for (const item of items) {
+    if (!item.itemId) continue;
+
+    try {
+      if (!item.combination || Object.keys(item.combination).length === 0) {
+        // Non-variant item: simple stock reduction
+        await Item.updateOne(
+          { _id: item.itemId, userId },
+          { $inc: { stock: -item.quantity } }
+        );
+      } else {
+        // Variant item: use arrayFilters to match and update specific variant
+        const result = await Item.updateOne(
+          { _id: item.itemId, userId },
+          { $inc: { "variants.$[variant].stock": -item.quantity } },
+          {
+            arrayFilters: [{ "variant.combination": item.combination }],
+            upsert: false,
+          }
+        );
+
+        // Check if the variant was found and matched
+        if (result.matchedCount === 0) {
+          console.warn(
+            `Item ${item.itemId} not found or not owned by user ${userId}`
+          );
+        } else if (result.modifiedCount === 0) {
+          // The item was found but no variants matched
+          const catalogItem = await Item.findById(item.itemId);
+          const variantLabel = buildVariantLabel(item.combination);
+          errors.push(
+            `${catalogItem.name}${variantLabel ? ` (${variantLabel})` : ""} - variant combination not found`
+          );
+        }
+      }
+    } catch (error) {
+      console.error(
+        `Stock deduction error for item ${item.itemId}:`,
+        error
+      );
+      errors.push(
+        `Failed to update stock for item ${item.itemId}: ${error.message}`
+      );
+    }
+  }
+
+  return {
+    success: errors.length === 0,
+    errors,
+  };
+};
+
 // @desc    Create order (auto-calculate totalAmount from items)
 // @route   POST /api/orders
 // @access  Private
@@ -107,35 +268,19 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Check stock availability and collect warnings
-    const warnings = [];
-    for (const item of items) {
-      if (!item.itemId) continue;
-
-      const catalogItem = await Item.findById(item.itemId);
-      if (!catalogItem) continue;
-
-      // Each variant is now its own document, so check its stock directly
-      const availableStock = catalogItem.stock || 0;
-
-      if (item.quantity > availableStock) {
-        const variantText = catalogItem.variantLabel
-          ? ` (${catalogItem.variantLabel})`
-          : "";
-        warnings.push(
-          `${catalogItem.name}${variantText} — only ${availableStock} in stock, ordered ${item.quantity}`,
-        );
-      }
-    }
+    // Validate stock availability and collect warnings
+    const stockValidation = await validateOrderStock(items);
+    const warnings = stockValidation.warnings;
 
     // Calculate total amount from items (with proper rounding for float precision)
     const totalAmount =
       Math.round(
         items.reduce((sum, item) => {
           return sum + item.quantity * item.price;
-        }, 0) * 100,
+        }, 0) * 100
       ) / 100;
 
+    // Create order with items (combination replaces variantLabel)
     const order = await Order.create({
       userId: req.user.id,
       customerId,
@@ -147,21 +292,17 @@ export const createOrder = async (req, res) => {
       notes,
     });
 
-    // Update item stock for each item in the order
+    // Deduct stock for each item
     // Wrap in try/catch to not block order creation on stock sync failure
     try {
-      for (const item of items) {
-        if (!item.itemId) continue;
-
-        // Each variant is now its own document with its own _id, so simple update
-        // Include userId verification to ensure we only update the correct user's items
-        await Item.updateOne(
-          { _id: item.itemId, userId: req.user.id },
-          { $inc: { stock: -item.quantity } },
-        );
+      const stockDeduction = await deductOrderStock(req.user.id, items);
+      if (!stockDeduction.success) {
+        console.error("Stock deduction warnings:", stockDeduction.errors);
+        // Add deduction errors to warnings but don't fail the order
+        stockDeduction.errors.forEach((error) => warnings.push(error));
       }
     } catch (stockError) {
-      console.error("Stock update error:", stockError);
+      console.error("Stock deduction process error:", stockError);
       // Don't throw - order is already created, just log error
     }
 

@@ -36,7 +36,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
     try {
       // Format date in LOCAL timezone (not UTC)
       const dateStr = `${date.getFullYear()}-${String(
-        date.getMonth() + 1
+        date.getMonth() + 1,
       ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       const response = await API.get(`/orders/stats/by-date?date=${dateStr}`, {
         headers: {
@@ -79,9 +79,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
   // Day cells
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday =
-      d === todayDate &&
-      month === todayMonth &&
-      year === todayYear;
+      d === todayDate && month === todayMonth && year === todayYear;
     const isSelected = selectedDay === d;
     cells.push(
       <div
@@ -97,14 +95,28 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
           fontSize: "12px",
           cursor: "pointer",
           margin: "2px auto",
-          background: isSelected ? "#378ADD" 
-                    : isToday ? "#1e1e1e" 
-                    : "transparent",
+          background: isSelected
+            ? "#378ADD"
+            : isToday
+              ? "#f5f5f5"
+              : "transparent",
           border: isToday && !isSelected ? "1px solid #378ADD" : "none",
-          color: isSelected ? "#fff" 
-               : isToday ? "#e8e8e8" 
-               : "#888",
-          transition: "background 0.15s",
+          color: isSelected ? "#fff" : isToday ? "#1a1a1a" : "#999999",
+          transition: "all 0.2s ease",
+          boxShadow: isSelected ? "0 4px 10px rgba(55,138,221,0.3)" : "none",
+          transform: isSelected ? "scale(1)" : "scale(1)",
+        }}
+        onMouseEnter={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.background = "#f0f6ff";
+            e.currentTarget.style.transform = "scale(1.05)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSelected) {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.transform = "scale(1)";
+          }
         }}
       >
         {d}
@@ -115,8 +127,8 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
   return (
     <div
       style={{
-        background: "#161616",
-        border: "1px solid #222",
+        background: "#ffffff",
+        border: "1px solid #e0e0e0",
         borderRadius: "14px",
         padding: "16px",
         display: "flex",
@@ -137,7 +149,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
           style={{
             background: "none",
             border: "none",
-            color: "#888",
+            color: "#999999",
             cursor: "pointer",
             fontSize: "16px",
             padding: "4px 8px",
@@ -145,7 +157,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
         >
           ‹
         </button>
-        <span style={{ fontSize: "13px", fontWeight: "500", color: "#e8e8e8" }}>
+        <span style={{ fontSize: "13px", fontWeight: "500", color: "#1a1a1a" }}>
           {monthNames[month]}, {year}
         </span>
         <button
@@ -153,7 +165,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
           style={{
             background: "none",
             border: "none",
-            color: "#888",
+            color: "#999999",
             cursor: "pointer",
             fontSize: "16px",
             padding: "4px 8px",
@@ -177,7 +189,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
             style={{
               textAlign: "center",
               fontSize: "10px",
-              color: "#444",
+              color: "#999999",
               padding: "4px 0",
             }}
           >
@@ -191,7 +203,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(7,1fr)",
-          gap: "2px",
+          gap: "8px",
         }}
       >
         {cells}
@@ -201,7 +213,7 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
       <div
         style={{
           marginTop: "12px",
-          background: "#1e1e1e",
+          background: "#f5f5f5",
           borderRadius: "10px",
           padding: "10px 14px",
           display: "flex",
@@ -228,11 +240,14 @@ export const CalendarWidget = ({ ordersThisMonthRevenue = 0 }) => {
               style={{
                 fontSize: "16px",
                 fontWeight: "500",
-                color: "#e8e8e8",
+                color: "#1a1a1a",
                 flex: 1,
               }}
             >
-              Rs. {Number(dateRevenue).toLocaleString('en-IN', { maximumFractionDigits: 2 }) || 0}
+              Rs.{" "}
+              {Number(dateRevenue).toLocaleString("en-IN", {
+                maximumFractionDigits: 2,
+              }) || 0}
             </span>
             <span
               style={{

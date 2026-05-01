@@ -19,11 +19,11 @@ import { CalendarWidget } from "../components/CalendarWidget";
 // SVG Icons
 const TotalRevenueIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="18"
+    height="18"
     viewBox="0 0 20 20"
     fill="none"
-    stroke="#333"
+    stroke="#cccccc"
     strokeWidth="1.5"
     strokeLinecap="round"
   >
@@ -33,11 +33,11 @@ const TotalRevenueIcon = () => (
 
 const PendingDuesIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="18"
+    height="18"
     viewBox="0 0 20 20"
     fill="none"
-    stroke="#333"
+    stroke="#cccccc"
     strokeWidth="1.5"
     strokeLinecap="round"
   >
@@ -48,11 +48,11 @@ const PendingDuesIcon = () => (
 
 const TotalOrdersIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="18"
+    height="18"
     viewBox="0 0 20 20"
     fill="none"
-    stroke="#333"
+    stroke="#cccccc"
     strokeWidth="1.5"
     strokeLinecap="round"
   >
@@ -63,11 +63,11 @@ const TotalOrdersIcon = () => (
 
 const ThisMonthIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="18"
+    height="18"
     viewBox="0 0 20 20"
     fill="none"
-    stroke="#333"
+    stroke="#cccccc"
     strokeWidth="1.5"
     strokeLinecap="round"
   >
@@ -227,13 +227,13 @@ export const Dashboard = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#111]">
+    <div className="relative min-h-screen bg-[#f8f9fa]">
       <Sidebar />
       <Navbar />
 
       <div className="ml-[232px] pt-[92px] px-[16px] pb-[32px] min-h-screen overflow-y-auto">
         {error && (
-          <div className="bg-[#2b0a0a] text-[#e05555] p-4 rounded-lg mb-6 border border-[#e05555] text-xs sm:text-sm">
+          <div className="bg-[#ffebee] text-[#c62828] p-4 rounded-lg mb-6 border border-[#ef5350] text-xs sm:text-sm">
             {error}
           </div>
         )}
@@ -247,186 +247,57 @@ export const Dashboard = () => {
             {/* Row 1: Horizontal Scrollable Card Strip */}
             <div style={{ position: "relative" }}>
               <div
-                className="card-strip"
+                className="stat-card-strip"
                 style={{
-                  display: "flex",
-                  gap: "14px",
                   alignItems: "flex-start",
-                  overflowX: "auto",
-                  paddingBottom: "8px",
-                  scrollbarWidth: "thin",
-                  scrollbarColor: "#2a2a2a transparent",
                   WebkitOverflowScrolling: "touch",
                 }}
               >
-                {/* Card 1: Total Revenue */}
+                {/* Card 1: Total Revenue — Primary KPI */}
                 <div
+                  className="stat-card primary"
                   style={{
                     flexShrink: 0,
-                    width: "220px",
-                    height: "220px",
-                    background: "#161616",
-                    border: "1px solid #222",
-                    borderRadius: "14px",
-                    padding: "20px",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>
-                      Total Revenue
-                    </span>
+                  <div className="stat-card-header">
+                    <span className="stat-card-label">Total Revenue</span>
                     <TotalRevenueIcon />
                   </div>
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 600,
-                      color: "#3fcf8e",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    Rs. {stats.totalRevenue.toLocaleString("en-IN")}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#555" }}>
-                    From paid orders
+                  <div style={{ flex: 1 }}>
+                    <div className="metric-value" style={{ color: "#1a9e6a" }}>
+                      Rs. {stats.totalRevenue.toLocaleString("en-IN")}
+                    </div>
+                    <div className="metric-subtext">From paid orders</div>
                   </div>
                 </div>
 
                 {/* Card 2: Pending Dues */}
                 <div
+                  className="stat-card secondary"
                   style={{
                     flexShrink: 0,
-                    width: "220px",
-                    height: "220px",
-                    background: "#161616",
-                    border: "1px solid #222",
-                    borderRadius: "14px",
-                    padding: "20px",
                   }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>
-                      Pending Dues
-                    </span>
+                  <div className="stat-card-header">
+                    <span className="stat-card-label">Pending Dues</span>
                     <PendingDuesIcon />
                   </div>
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 600,
-                      color: "#e05555",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    Rs. {stats.pendingDues.toLocaleString("en-IN")}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#555" }}>
-                    Unpaid orders
+                  <div style={{ flex: 1 }}>
+                    <div className="metric-value" style={{ color: "#cc3333" }}>
+                      Rs. {stats.pendingDues.toLocaleString("en-IN")}
+                    </div>
+                    <div className="metric-subtext">Unpaid orders</div>
                   </div>
                 </div>
 
                 {/* Card 3: Total Orders */}
                 <div
+                  className="stat-card card-elevated"
                   style={{
                     flexShrink: 0,
                     width: "220px",
                     height: "220px",
-                    background: "#161616",
-                    border: "1px solid #222",
-                    borderRadius: "14px",
-                    padding: "20px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>
-                      Total Orders
-                    </span>
-                    <TotalOrdersIcon />
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 600,
-                      color: "#e8e8e8",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    {stats.totalOrders}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#555" }}>All time</div>
-                </div>
-
-                {/* Card 4: This Month */}
-                <div
-                  style={{
-                    flexShrink: 0,
-                    width: "220px",
-                    height: "220px",
-                    background: "#161616",
-                    border: "1px solid #222",
-                    borderRadius: "14px",
-                    padding: "20px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    <span style={{ fontSize: "12px", color: "#555", fontWeight: 500 }}>
-                      This Month
-                    </span>
-                    <ThisMonthIcon />
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 600,
-                      color: "#378ADD",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    {stats.ordersThisMonth}
-                  </div>
-                  <div style={{ fontSize: "11px", color: "#555" }}>
-                    Orders created
-                  </div>
-                </div>
-
-                {/* Card 5: Low Stock Alert */}
-                <div
-                  style={{
-                    flexShrink: 0,
-                    width: "220px",
-                    height: "220px",
-                    background: "#161616",
-                    border: "1px solid #222",
-                    borderRadius: "14px",
-                    padding: "20px",
                   }}
                 >
                   <div
@@ -437,7 +308,79 @@ export const Dashboard = () => {
                       marginBottom: "12px",
                     }}
                   >
-                    <span style={{ fontSize: "12px", color: "#555" }}>
+                    <span style={{ fontSize: "12px", color: "#999999" }}>
+                      Total Orders
+                    </span>
+                    <TotalOrdersIcon />
+                  </div>
+                  <div
+                    className="stat-value"
+                    style={{
+                      color: "#111111",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    {stats.totalOrders}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#999999" }}>
+                    All time
+                  </div>
+                </div>
+
+                {/* Card 4: This Month */}
+                <div
+                  className="stat-card card-elevated"
+                  style={{
+                    flexShrink: 0,
+                    width: "220px",
+                    height: "220px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", color: "#999999" }}>
+                      This Month
+                    </span>
+                    <ThisMonthIcon />
+                  </div>
+                  <div
+                    className="stat-value"
+                    style={{
+                      color: "#378ADD",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    {stats.ordersThisMonth}
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#999999" }}>
+                    Orders created
+                  </div>
+                </div>
+
+                {/* Card 5: Low Stock Alert */}
+                <div
+                  className="stat-card card-elevated"
+                  style={{
+                    flexShrink: 0,
+                    width: "220px",
+                    height: "220px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <span style={{ fontSize: "12px", color: "#999999" }}>
                       Low stock alert
                     </span>
                     <svg
@@ -445,7 +388,7 @@ export const Dashboard = () => {
                       height="18"
                       viewBox="0 0 18 18"
                       fill="none"
-                      stroke={lowStockCount > 0 ? "#e8a020" : "#333"}
+                      stroke={lowStockCount > 0 ? "#c47f00" : "#cccccc"}
                       strokeWidth="1.5"
                       strokeLinecap="round"
                     >
@@ -454,17 +397,24 @@ export const Dashboard = () => {
                     </svg>
                   </div>
                   <div
+                    className="stat-value"
                     style={{
-                      fontSize: "24px",
-                      fontWeight: 600,
-                      color: lowStockCount > 0 ? "#e8a020" : "#e8e8e8",
+                      color: lowStockCount > 0 ? "#c47f00" : "#111111",
                       marginBottom: "4px",
                     }}
                   >
                     {lowStockCount}
                   </div>
-                  <div style={{ fontSize: "11px", color: "#555", marginBottom: "12px" }}>
-                    {lowStockCount === 0 ? "All items stocked" : "Items need restock"}
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#999999",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    {lowStockCount === 0
+                      ? "All items stocked"
+                      : "Items need restock"}
                   </div>
 
                   {/* Mini list of up to 3 low stock items */}
@@ -482,7 +432,7 @@ export const Dashboard = () => {
                       <span
                         style={{
                           fontSize: "11px",
-                          color: "#888",
+                          color: "#666666",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -497,8 +447,8 @@ export const Dashboard = () => {
                           fontSize: "10px",
                           fontWeight: 500,
                           flexShrink: 0,
-                          color: item.stock === 0 ? "#e05555" : "#e8a020",
-                          background: item.stock === 0 ? "#2b0a0a" : "#2b1a00",
+                          color: item.stock === 0 ? "#cc3333" : "#c47f00",
+                          background: item.stock === 0 ? "#fdecea" : "#fff8e6",
                           padding: "2px 6px",
                           borderRadius: "10px",
                           marginLeft: "6px",
@@ -510,7 +460,14 @@ export const Dashboard = () => {
                   ))}
 
                   {lowStockCount > 3 && (
-                    <div style={{ fontSize: "10px", color: "#555", marginTop: "6px", textAlign: "right" }}>
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        color: "#999999",
+                        marginTop: "6px",
+                        textAlign: "right",
+                      }}
+                    >
                       +{lowStockCount - 3} more
                     </div>
                   )}
@@ -518,14 +475,12 @@ export const Dashboard = () => {
 
                 {/* Card 6: Top Selling Item */}
                 <div
+                  className="stat-card card-elevated"
                   style={{
                     flexShrink: 0,
                     width: "220px",
                     height: "220px",
-                    background: "#161616",
-                    border: "1px solid #222",
-                    borderRadius: "14px",
-                    padding: "20px",
+
                     display: "flex",
                     flexDirection: "column",
                   }}
@@ -538,7 +493,7 @@ export const Dashboard = () => {
                       marginBottom: "12px",
                     }}
                   >
-                    <span style={{ fontSize: "12px", color: "#555" }}>
+                    <span style={{ fontSize: "12px", color: "#999999" }}>
                       Top selling items
                     </span>
                     <svg
@@ -546,12 +501,18 @@ export const Dashboard = () => {
                       height="18"
                       viewBox="0 0 18 18"
                       fill="none"
-                      stroke="#333"
+                      stroke="#cccccc"
                       strokeWidth="1.5"
                       strokeLinecap="round"
                     >
                       <path d="M3 14l4-5 3 3 4-6" />
-                      <circle cx="15" cy="5" r="1.5" fill="#378ADD" stroke="none" />
+                      <circle
+                        cx="15"
+                        cy="5"
+                        r="1.5"
+                        fill="#378ADD"
+                        stroke="none"
+                      />
                     </svg>
                   </div>
 
@@ -562,7 +523,7 @@ export const Dashboard = () => {
                         style={{
                           fontSize: "14px",
                           fontWeight: 500,
-                          color: "#e8e8e8",
+                          color: "#1a1a1a",
                           marginBottom: "2px",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
@@ -571,7 +532,13 @@ export const Dashboard = () => {
                       >
                         {topSellingItems[0].name}
                       </div>
-                      <div style={{ fontSize: "11px", color: "#555", marginBottom: "12px" }}>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "#999999",
+                          marginBottom: "12px",
+                        }}
+                      >
                         {topSellingItems[0].totalQty} units sold
                       </div>
                     </>
@@ -581,13 +548,19 @@ export const Dashboard = () => {
                         style={{
                           fontSize: "24px",
                           fontWeight: 600,
-                          color: "#e8e8e8",
+                          color: "#111111",
                           marginBottom: "4px",
                         }}
                       >
                         —
                       </div>
-                      <div style={{ fontSize: "11px", color: "#555", marginBottom: "12px" }}>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: "#999999",
+                          marginBottom: "12px",
+                        }}
+                      >
                         No sales yet
                       </div>
                     </>
@@ -615,14 +588,25 @@ export const Dashboard = () => {
                           borderTop: i === 0 ? "1px solid #1e1e1e" : "none",
                         }}
                       >
-                        <span style={{ fontSize: "10px", color: "#444", minWidth: "14px" }}>
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color: "#1a5fa5",
+                            background: "#e8f2fc",
+                            padding: "2px 6px",
+                            borderRadius: "10px",
+                            minWidth: "20px",
+                            textAlign: "center",
+                            fontWeight: 500,
+                          }}
+                        >
                           {i + 1}
                         </span>
 
                         <span
                           style={{
                             fontSize: "11px",
-                            color: "#888",
+                            color: "#666666",
                             flex: 1,
                             whiteSpace: "nowrap",
                             overflow: "hidden",
@@ -658,7 +642,7 @@ export const Dashboard = () => {
                   right: 0,
                   width: "60px",
                   height: "calc(100% - 8px)",
-                  background: "linear-gradient(to right, transparent, #111)",
+                  background: "linear-gradient(to right, transparent, #f8f9fa)",
                   pointerEvents: "none",
                   borderRadius: "0 14px 14px 0",
                 }}
@@ -671,15 +655,15 @@ export const Dashboard = () => {
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
                 gap: "24px",
+                marginTop: "24px",
               }}
             >
               {/* Revenue Chart */}
               <div
+                className="section-card card-elevated section-hover"
                 style={{
-                  background: "#161616",
-                  border: "1px solid #222",
-                  borderRadius: "14px",
-                  padding: "20px",
+                  padding: "18px 20px",
+                  paddingTop: "10px",
                 }}
               >
                 <div style={{ marginBottom: "20px" }}>
@@ -695,7 +679,7 @@ export const Dashboard = () => {
                       <div
                         style={{
                           fontSize: "14px",
-                          color: "#888",
+                          color: "#999999",
                           marginBottom: "4px",
                         }}
                       >
@@ -705,7 +689,7 @@ export const Dashboard = () => {
                         style={{
                           fontSize: "28px",
                           fontWeight: 600,
-                          color: "white",
+                          color: "#1a1a1a",
                           display: "flex",
                           alignItems: "center",
                           gap: "8px",
@@ -726,15 +710,11 @@ export const Dashboard = () => {
                             borderRadius: "20px",
                             border: "none",
                             cursor: "pointer",
-                            background:
-                              period === p
-                                ? "#e8e8e8"
-                                : "transparent",
-                            color:
-                              period === p
-                                ? "black"
-                                : "#555",
-                            transition: "all 0.2s",
+                            background: period === p ? "#378ADD" : "#f5f5f5",
+                            color: period === p ? "#ffffff" : "#666666",
+                            transition: "all 0.2s ease",
+                            transform:
+                              period === p ? "scale(1.05)" : "scale(1)",
                           }}
                         >
                           {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -746,9 +726,9 @@ export const Dashboard = () => {
                   <ResponsiveContainer width="100%" height={180}>
                     <BarChart data={chartData}>
                       <CartesianGrid strokeOpacity={0} />
-                      <XAxis 
+                      <XAxis
                         dataKey="label"
-                        stroke="#555"
+                        stroke="#999999"
                         fontSize={11}
                         axisLine={false}
                         tickLine={false}
@@ -757,20 +737,27 @@ export const Dashboard = () => {
                       <YAxis hide />
                       <Tooltip
                         contentStyle={{
-                          background: "#1e1e1e",
-                          border: "1px solid #333",
+                          background: "#ffffff",
+                          border: "1px solid #e0e0e0",
                           borderRadius: "8px",
-                          color: "#e8e8e8",
+                          color: "#1a1a1a",
                           fontSize: "12px",
                         }}
                         cursor={{ fill: "#378ADD", opacity: 0.1 }}
-                        formatter={(val) => [`Rs. ${val.toLocaleString("en-IN")}`, "Revenue"]}
+                        formatter={(val) => [
+                          `Rs. ${val.toLocaleString("en-IN")}`,
+                          "Revenue",
+                        ]}
                       />
-                      <Bar dataKey="revenue" radius={[8, 8, 0, 0]}>
+                      <Bar dataKey="revenue" radius={[6, 6, 0, 0]}>
                         {chartData.map((entry, index) => (
                           <Cell
                             key={index}
-                            fill={index === chartData.length - 1 ? "#378ADD" : "#252525"}
+                            fill={
+                              index === chartData.length - 1
+                                ? "#2f78c4"
+                                : "#eaeaea"
+                            }
                           />
                         ))}
                       </Bar>
@@ -780,205 +767,193 @@ export const Dashboard = () => {
               </div>
 
               {/* Calendar Widget */}
-              <CalendarWidget
-                ordersThisMonthRevenue={
-                  chartData?.length > 0 
-                    ? chartData[chartData.length - 1]?.revenue || 0
-                    : 0
-                }
-              />
+              <div
+                className="section-card card-elevated section-hover"
+                style={{ padding: "18px 20px" }}
+              >
+                <CalendarWidget
+                  ordersThisMonthRevenue={
+                    chartData?.length > 0
+                      ? chartData[chartData.length - 1]?.revenue || 0
+                      : 0
+                  }
+                />
+              </div>
             </div>
 
             {/* Row 3: Recent Orders */}
-            <div
-              style={{
-                background: "#161616",
-                border: "1px solid #222",
-                borderRadius: "14px",
-                padding: "24px",
-              }}
-            >
+            <div className="section-card card-elevated card-padding section-spacing">
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: "20px",
+                  marginBottom: "16px",
                 }}
               >
-                <h2
+                <span
                   style={{
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    color: "white",
-                    margin: 0,
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#111111",
                   }}
                 >
                   Recent Orders
-                </h2>
-                <button
-                  onClick={() => navigate("/dashboard/orders")}
+                </span>
+                <a
+                  href="/dashboard/orders"
                   style={{
+                    fontSize: "12px",
                     color: "#378ADD",
-                    background: "none",
-                    border: "none",
-                    fontSize: "13px",
-                    fontWeight: 600,
+                    textDecoration: "none",
                     cursor: "pointer",
                   }}
                 >
                   View All →
-                </button>
+                </a>
               </div>
 
               {recentOrders && recentOrders.length > 0 ? (
-                <div className="hidden md:block overflow-x-auto">
-                  <table style={{ width: "100%", fontSize: "14px" }}>
-                    <thead
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr
                       style={{
-                        background: "#1a1a1a",
-                        borderBottom: "1px solid #222",
+                        background: "#fafafa",
+                        borderBottom: "1px solid #f0f0f0",
                       }}
                     >
-                      <tr>
+                      {[
+                        "Invoice #",
+                        "Customer",
+                        "Amount",
+                        "Order Status",
+                        "Payment Status",
+                        "Date",
+                      ].map((h) => (
                         <th
+                          key={h}
                           style={{
-                            textAlign: "left",
                             padding: "12px",
-                            color: "#888",
-                            fontWeight: 600,
-                            fontSize: "12px",
+                            fontSize: "11px",
+                            color: "#999999",
+                            fontWeight: "500",
+                            textAlign: "left",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.5px",
                           }}
                         >
-                          Invoice #
+                          {h}
                         </th>
-                        <th
-                          style={{
-                            textAlign: "left",
-                            padding: "12px",
-                            color: "#888",
-                            fontWeight: 600,
-                            fontSize: "12px",
-                          }}
-                        >
-                          Customer
-                        </th>
-                        <th
-                          style={{
-                            textAlign: "left",
-                            padding: "12px",
-                            color: "#888",
-                            fontWeight: 600,
-                            fontSize: "12px",
-                          }}
-                        >
-                          Amount
-                        </th>
-                        <th
-                          style={{
-                            textAlign: "left",
-                            padding: "12px",
-                            color: "#888",
-                            fontWeight: 600,
-                            fontSize: "12px",
-                          }}
-                        >
-                          Order Status
-                        </th>
-                        <th
-                          style={{
-                            textAlign: "left",
-                            padding: "12px",
-                            color: "#888",
-                            fontWeight: 600,
-                            fontSize: "12px",
-                          }}
-                        >
-                          Payment Status
-                        </th>
-                        <th
-                          style={{
-                            textAlign: "left",
-                            padding: "12px",
-                            color: "#888",
-                            fontWeight: 600,
-                            fontSize: "12px",
-                          }}
-                        >
-                          Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentOrders.map((order, i) => {
-                        // Customer name — customerId is a populated object
-                        const customerName =
-                          order.customerId?.name || order.customerId || "Unknown";
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order, i) => {
+                      const customerName =
+                        order.customerId?.name || order.customer?.name || "—";
 
-                        // Amount
-                        const amount = order.totalAmount
-                          ? `Rs. ${Number(order.totalAmount).toLocaleString(
-                              "en-IN"
-                            )}`
-                          : "Rs. 0";
+                      const amount = `Rs. ${Number(
+                        order.totalAmount || 0,
+                      ).toLocaleString("en-IN")}`;
 
-                        // Date — fix Invalid Date
-                        const dateStr = order.createdAt
-                          ? new Date(order.createdAt).toLocaleDateString(
-                              "en-IN",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )
-                          : "—";
+                      const dateStr = order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )
+                        : "—";
 
-                        // Invoice number
-                        const invoiceNum = order.invoiceNumber || "N/A";
+                      const capitalize = (s) =>
+                        s ? s.charAt(0).toUpperCase() + s.slice(1) : "—";
 
-                        return (
-                          <tr
-                            key={order._id || i}
-                            onClick={() =>
-                              navigate(`/dashboard/orders/${order._id}`)
-                            }
+                      return (
+                        <tr
+                          key={order._id}
+                          className="interactive-tile"
+                          onClick={() =>
+                            navigate(`/dashboard/orders/${order._id}`)
+                          }
+                          style={{
+                            borderBottom: "1px solid #f0f0f0",
+                            cursor: "pointer",
+                            transition: "background 0.15s",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background = "#f9f9f9")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "transparent")
+                          }
+                        >
+                          <td
                             style={{
-                              borderBottom: "1px solid #1e1e1e",
-                              transition: "background 0.15s",
-                              cursor: "pointer",
+                              padding: "14px 12px",
+                              fontSize: "12px",
+                              color: "#999999",
                             }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.background = "#1a1a1a")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.background = "transparent")
-                            }
                           >
-                            <td style={tdStyle}>{invoiceNum}</td>
-                            <td style={tdStyle}>{customerName}</td>
-                            <td style={tdStyle}>{amount}</td>
-                            <td style={tdStyle}>
-                              <StatusPill status={order.orderStatus} />
-                            </td>
-                            <td style={tdStyle}>
-                              <StatusPill status={order.paymentStatus} />
-                            </td>
-                            <td style={{ ...tdStyle, color: "#555" }}>
-                              {dateStr}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                            {order.invoiceNumber || "N/A"}
+                          </td>
+                          <td style={{ padding: "14px 12px" }}>
+                            <span
+                              style={{
+                                fontWeight: "500",
+                                color: "#111111",
+                                fontSize: "13px",
+                              }}
+                            >
+                              {customerName}
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              padding: "14px 12px",
+                              fontWeight: "500",
+                              color: "#111111",
+                              fontSize: "13px",
+                            }}
+                          >
+                            {amount}
+                          </td>
+                          <td style={{ padding: "14px 12px" }}>
+                            <span
+                              className={`pill pill-${order.orderStatus?.toLowerCase()}`}
+                            >
+                              {capitalize(order.orderStatus)}
+                            </span>
+                          </td>
+                          <td style={{ padding: "14px 12px" }}>
+                            <span
+                              className={`pill pill-${order.paymentStatus?.toLowerCase()}`}
+                            >
+                              {capitalize(order.paymentStatus)}
+                            </span>
+                          </td>
+                          <td
+                            style={{
+                              padding: "14px 12px",
+                              fontSize: "12px",
+                              color: "#999999",
+                            }}
+                          >
+                            {dateStr}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               ) : (
                 <div
                   style={{
                     textAlign: "center",
-                    color: "#888",
+                    color: "#999999",
                     padding: "32px 0",
+                    fontSize: "14px",
                   }}
                 >
                   No recent orders

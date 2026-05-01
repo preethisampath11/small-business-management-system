@@ -21,6 +21,16 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
+      // Combination object for variant items, empty object for non-variant items
+      // Example: { Size: "M", Color: "Red" }
+      combination: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {},
+      },
+      // Optional: Display label built from combination (e.g., "M / Red")
+      variantLabel: {
+        type: String,
+      },
       quantity: {
         type: Number,
         required: true,
@@ -30,9 +40,6 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true,
         min: 0,
-      },
-      variantLabel: {
-        type: String,
       },
     },
   ],
